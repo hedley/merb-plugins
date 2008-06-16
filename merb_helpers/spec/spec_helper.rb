@@ -341,7 +341,10 @@ module Merb
   end
 end
 
-describe "FakeBufferConsumer", :shared => true do
+describe "FakeController", :shared => true do
+  class_inheritable_accessor :_form_class
+  self._form_class = Merb::Plugins.config[:helpers][:form_class]
+  
   before :each do
     @obj = FakeModel.new
     def _buffer(buf = "") @buffer ||= "" end
