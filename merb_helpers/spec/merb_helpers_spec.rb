@@ -275,68 +275,70 @@ describe "radio_control (data bound)" do
     end
   end
 end
-# 
-# describe "password_field (basic)" do
-#   it_should_behave_like "FakeController"
-# 
-#   it "should return a basic password field, but omit the value" do
-#     password_field(:name => "foo", :value => "bar").should match_tag(:input, :type => "password", :name => "foo")
-#   end
-# 
-#   it "should provide an additional label tag if the :label option is passed in" do
-#     result = password_field(:label => "LABEL" )
-#     result.should match(/<label.*>LABEL<\/label><input type="password" class="password"\s*\/>/)
-#   end
-# end
-# 
-# describe "password_control (data bound)" do
-#   it_should_behave_like "FakeController"
-# 
-#   it "should take a string object and return a useful password control, but omit the value" do
-#     f = form_for :obj do
-#       password_control(:foo).should match_tag(:input, :type => "password", :name => "fake_model[foo]")
-#     end
-#   end
-# 
-#   it "should take additional attributes and use them" do
-#     form_for :obj do
-#       password_control(:foo, :bar => "7").should match_tag(:input, :type => "password", :name => "fake_model[foo]", :bar => "7")
-#     end
-#   end
-# 
-#   it "should provide an additional label tag if the :label option is passed in" do
-#     form_for :obj do
-#       _buffer << password_control(:foo, :label => "LABEL")
-#     end
-#     _buffer.should match(/<label.*>LABEL<\/label><input/)
-#     res = _buffer.scan(/<[^>]*>/)
-#     res[2].should_not match_tag(:input, :label => "LABEL")
-#   end
-# 
-#   it "should not errorify the field for a new object" do
-#     f = form_for :obj do
-#       password_control(:foo, :bar =>"7").should_not match_tag(:input, :class => "error")
-#     end
-#   end
-# 
-#   it "should errorify a field for a model with errors" do
-#     model = mock("model")
-#     model.stub!(:new_record?).and_return(true)
-#     model.stub!(:class).and_return("MyClass")
-#     model.stub!(:foo).and_return("FOO")
-#     errors = mock("errors")
-#     errors.should_receive(:on).with(:foo).and_return(true)
-# 
-#     model.stub!(:errors).and_return(errors)
-# 
-#     f = form_for model do
-#       password_control(:foo).should match_tag(:input, :class => "error password")
-#     end
-#   end
-# 
-# end
-# 
+
+describe "password_field (basic)" do
+  it_should_behave_like "FakeController"
+
+  it "should return a basic password field, but omit the value" do
+    password_field(:name => "foo", :value => "bar").should match_tag(:input, :type => "password", :name => "foo")
+  end
+
+  it "should provide an additional label tag if the :label option is passed in" do
+    result = password_field(:label => "LABEL" )
+    result.should match(/<label.*>LABEL<\/label><input type="password" class="password"\s*\/>/)
+  end
+end
+
+describe "password_control (data bound)" do
+  it_should_behave_like "FakeController"
+
+  it "should take a string object and return a useful password control, but omit the value" do
+    f = form_for @obj do
+      password_control(:foo).should match_tag(:input, :type => "password", :name => "fake_model[foo]")
+    end
+  end
+
+  it "should take additional attributes and use them" do
+    form_for @obj do
+      password_control(:foo, :bar => "7").should match_tag(:input, :type => "password", :name => "fake_model[foo]", :bar => "7")
+    end
+  end
+
+  it "should provide an additional label tag if the :label option is passed in" do
+    form_for @obj do
+      _buffer << password_control(:foo, :label => "LABEL")
+    end
+    _buffer.should match(/<label.*>LABEL<\/label><input/)
+    res = _buffer.scan(/<[^>]*>/)
+    res[2].should_not match_tag(:input, :label => "LABEL")
+  end
+
+  it "should not errorify the field for a new object" do
+    f = form_for @obj do
+      password_control(:foo, :bar =>"7").should_not match_tag(:input, :class => "error")
+    end
+  end
+
+  it "should errorify a field for a model with errors" do
+    model = mock("model")
+    model.stub!(:new_record?).and_return(true)
+    model.stub!(:class).and_return("MyClass")
+    model.stub!(:foo).and_return("FOO")
+    errors = mock("errors")
+    errors.should_receive(:on).with(:foo).and_return(true)
+
+    model.stub!(:errors).and_return(errors)
+
+    f = form_for model do
+      password_control(:foo).should match_tag(:input, :class => "error password")
+    end
+  end
+
+end
+
 # describe "checkbox_field (basic)" do
+#   it_should_behave_like "FakeController"
+#   
 #   it "should return a basic checkbox based on the values passed in" do
 #     checkbox_field(:name => "foo", :checked => "checked").should match_tag(:input, :class => "checkbox", :name => "foo", :checked => "checked")
 #   end
@@ -430,64 +432,65 @@ end
 #     end
 # end
 # 
-# describe "hidden_field (basic)" do
-# 
-#   it "should return a basic checkbox based on the values passed in" do
-#     hidden_field(:name => "foo", :value => "bar").should match_tag(:input, :type => "hidden", :name => "foo", :value => "bar")
-#   end
-# 
-#   it "should not render a label if the :label option is passed in" do
-#     res = hidden_field(:label => "LABEL")
-#     res.should_not match(/<label>LABEL/)
-#     res.should_not match_tag(:input, :label=> "LABEL")
-#   end
-# end
-# 
-# describe "hidden_control (data bound)" do
-#   it_should_behave_like "FakeController"
-# 
-#   it "should take a string and return a useful checkbox control" do
-#     form_for :obj do
-#       hidden_control(:foo).should match_tag(:input, :type =>"hidden", :name => "fake_model[foo]", :value => "foowee")
-#     end
-#   end
-# 
-#   it "should render controls with errors if their attribute contains an error" do
-#     form_for :obj do
-#       hidden_control(:foobad).should match_tag(:input, :type =>"hidden", :name => "fake_model[foobad]", :value => "foowee", :class => "error hidden")
-#     end
-#   end
-# 
-#   it "should not render a label if the :label option is passed in" do
-#     form_for :obj do
-#       res = hidden_control(:foo, :label => "LABEL")
-#       res.should_not match(/<label>LABEL/)
-#       res.should_not match_tag(:input, :label=> "LABEL")
-#     end
-#   end
-# 
-#   it "should not errorify the field for a new object" do
-#     f = form_for :obj do
-#       hidden_control(:foo, :bar =>"7").should_not match_tag(:input, :type => "hidden", :class => "error")
-#     end
-#   end
-# 
-#   it "should not errorify a field for a model with errors" do
-#     model = mock("model")
-#     model.stub!(:new_record?).and_return(true)
-#     model.stub!(:class).and_return("MyClass")
-#     model.stub!(:foo).and_return("FOO")
-#     errors = mock("errors")
-#     errors.should_receive(:on).with(:foo).and_return(true)
-# 
-#     model.stub!(:errors).and_return(errors)
-# 
-#     f = form_for model do
-#       hidden_control(:foo, :bar =>"7").should match_tag(:input, :type => "hidden", :name => "my_class[foo]", :class => "error hidden")
-#     end
-#   end
-# 
-# end
+describe "hidden_field (basic)" do
+  it_should_behave_like "FakeController"
+  
+  it "should return a basic checkbox based on the values passed in" do
+    hidden_field(:name => "foo", :value => "bar").should match_tag(:input, :type => "hidden", :name => "foo", :value => "bar")
+  end
+
+  it "should not render a label if the :label option is passed in" do
+    res = hidden_field(:label => "LABEL")
+    res.should_not match(/<label>LABEL/)
+    res.should_not match_tag(:input, :label=> "LABEL")
+  end
+end
+
+describe "hidden_control (data bound)" do
+  it_should_behave_like "FakeController"
+
+  it "should take a string and return a useful checkbox control" do
+    form_for @obj do
+      hidden_control(:foo).should match_tag(:input, :type =>"hidden", :name => "fake_model[foo]", :value => "foowee")
+    end
+  end
+
+  it "should render controls with errors if their attribute contains an error" do
+    form_for @obj do
+      hidden_control(:foobad).should match_tag(:input, :type =>"hidden", :name => "fake_model[foobad]", :value => "foowee", :class => "error hidden")
+    end
+  end
+
+  it "should not render a label if the :label option is passed in" do
+    form_for @obj do
+      res = hidden_control(:foo, :label => "LABEL")
+      res.should_not match(/<label>LABEL/)
+      res.should_not match_tag(:input, :label=> "LABEL")
+    end
+  end
+
+  it "should not errorify the field for a new object" do
+    f = form_for @obj do
+      hidden_control(:foo, :bar =>"7").should_not match_tag(:input, :type => "hidden", :class => "error")
+    end
+  end
+
+  it "should not errorify a field for a model with errors" do
+    model = mock("model")
+    model.stub!(:new_record?).and_return(true)
+    model.stub!(:class).and_return("MyClass")
+    model.stub!(:foo).and_return("FOO")
+    errors = mock("errors")
+    errors.should_receive(:on).with(:foo).and_return(true)
+
+    model.stub!(:errors).and_return(errors)
+
+    f = form_for model do
+      hidden_control(:foo, :bar =>"7").should match_tag(:input, :type => "hidden", :name => "my_class[foo]", :class => "error hidden")
+    end
+  end
+
+end
 # 
 # describe "radio button (basic)" do
 #   it "should should return a basic radio button based on the values passed in" do

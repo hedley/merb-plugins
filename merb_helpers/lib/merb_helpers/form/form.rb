@@ -46,7 +46,7 @@ module Merb
     def update_fields(attrs, type)
     end
     
-    %w(text radio).each do |kind|
+    %w(text radio password hidden).each do |kind|
       self.class_eval <<-RUBY
         def #{kind}_control(method, attrs)
           name = "\#{@name}[\#{method}]"
@@ -73,15 +73,7 @@ module Merb
       add_class(attrs, type)
       super
     end
-    
-    %w(text radio).each do |kind|
-      self.class_eval <<-RUBY
-        def #{kind}_field(attrs)
-          label(attrs) + super
-        end
-      RUBY
-    end
-        
+
     def add_id_to_attrs(method, attrs)
       attrs.merge!(:id => "#{@name}_#{method}")
     end
@@ -89,6 +81,20 @@ module Merb
     def label(attrs)
       (label_text = attrs.delete(:label)) ? tag(:label, label_text) : ""
     end
+    
+    %w(text radio password).each do |kind|
+      self.class_eval <<-RUBY
+        def #{kind}_field(attrs)
+          label(attrs) + super
+        end
+      RUBY
+    end
+    
+    def hidden_field(attrs)
+      attrs.delete(:label)
+      super
+    end
+    
   end
   
   class CompleteFormWithErrors < CompleteForm

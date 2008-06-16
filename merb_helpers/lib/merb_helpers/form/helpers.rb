@@ -48,7 +48,7 @@ module Merb
         end
       end
       
-      %w(text radio).each do |kind|
+      %w(text radio password hidden).each do |kind|
         self.class_eval <<-RUBY
           def #{kind}_control(name, attrs = {})
             current_form_context.#{kind}_control(name, attrs)
