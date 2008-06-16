@@ -39,26 +39,51 @@ module Merb
     def add_class(attrs, new_class)
       attrs[:class] = (attrs[:class].to_s.split(" ") + [new_class]).join(" ")
     end
-    
-    def text_control(method, attrs)
-      name = "#{@name}[#{method}]"
-      text_field(attrs.merge(:name => name, :value => @obj.send(method)))
+
+    def update_control_fields(method, attrs, type)
     end
     
-    def text_field(attrs)
-      self_closing_tag(:input, {:type => "text"}.merge(attrs))
+    def update_fields(attrs, type)
     end
+    
+    %w(text radio).each do |kind|
+      self.class_eval <<-RUBY
+        def #{kind}_control(method, attrs)
+          name = "\#{@name}[\#{method}]"
+          update_control_fields(method, attrs, "#{kind}")
+          #{kind}_field(attrs.merge(:name => name, :value => @obj.send(method)))
+        end
+        
+        def #{kind}_field(attrs)
+          update_fields(attrs, "#{kind}")
+          self_closing_tag(:input, {:type => "#{kind}"}.merge(attrs))
+        end
+      RUBY
+    end
+
   end
   
   class CompleteForm < Form
-    def text_control(method, attrs)
-      attrs.merge!(:id => "#{@name}_#{method}")
+    def update_control_fields(method, attrs, type)
+      add_id_to_attrs(method, attrs)
       super
     end
     
-    def text_field(attrs)
-      add_class(attrs, "text")
-      label(attrs) + super
+    def update_fields(attrs, type)
+      add_class(attrs, type)
+      super
+    end
+    
+    %w(text radio).each do |kind|
+      self.class_eval <<-RUBY
+        def #{kind}_field(attrs)
+          label(attrs) + super
+        end
+      RUBY
+    end
+        
+    def add_id_to_attrs(method, attrs)
+      attrs.merge!(:id => "#{@name}_#{method}")
     end
     
     def label(attrs)
@@ -67,12 +92,12 @@ module Merb
   end
   
   class CompleteFormWithErrors < CompleteForm
-    def text_control(method, attrs)
-      errorify_attrs(method, attrs)
+    def update_control_fields(method, attrs, type)
+      add_error_to_attrs(method, attrs)
       super
     end
     
-    def errorify_attrs(method, attrs)
+    def add_error_to_attrs(method, attrs)
       if @obj.errors.on(method.to_sym)
         add_class(attrs, "error")
       end

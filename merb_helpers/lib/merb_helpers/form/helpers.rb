@@ -48,12 +48,16 @@ module Merb
         end
       end
       
-      def text_control(name, attrs = {})
-        current_form_context.text_control(name, attrs)
-      end
-      
-      def text_field(attrs = {})
-        _singleton_form_context.text_field(attrs)
+      %w(text radio).each do |kind|
+        self.class_eval <<-RUBY
+          def #{kind}_control(name, attrs = {})
+            current_form_context.#{kind}_control(name, attrs)
+          end
+          
+          def #{kind}_field(attrs = {})
+            _singleton_form_context.#{kind}_field(attrs)
+          end
+        RUBY
       end
       
     end
