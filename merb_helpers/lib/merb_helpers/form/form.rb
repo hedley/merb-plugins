@@ -65,17 +65,13 @@ module Merb
   
   class CompleteForm < Form
     def update_control_fields(method, attrs, type)
-      add_id_to_attrs(method, attrs)
+      attrs.merge!(:id => "#{@name}_#{method}")
       super
     end
     
     def update_fields(attrs, type)
       add_class(attrs, type)
       super
-    end
-
-    def add_id_to_attrs(method, attrs)
-      attrs.merge!(:id => "#{@name}_#{method}")
     end
     
     def label(attrs)
@@ -99,15 +95,11 @@ module Merb
   
   class CompleteFormWithErrors < CompleteForm
     def update_control_fields(method, attrs, type)
-      add_error_to_attrs(method, attrs)
-      super
-    end
-    
-    def add_error_to_attrs(method, attrs)
       if @obj.errors.on(method.to_sym)
         add_class(attrs, "error")
       end
-    end
+      super
+    end    
   end
   
 end
