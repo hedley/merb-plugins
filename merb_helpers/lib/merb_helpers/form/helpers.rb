@@ -14,11 +14,7 @@ module Merb
       def current_form_context
         form_contexts.last || _singleton_form_context
       end
-      
-      def form_tag(*args, &blk)
-        _singleton_form_context.form_tag(*args, &blk)
-      end
-      
+
       def _new_form_context(name, builder)
         if name.is_a?(String) || name.is_a?(Symbol)
           ivar = instance_variable_get("@#{name}")
@@ -32,9 +28,13 @@ module Merb
       def with_form_context(name, builder)
         form_contexts.push(_new_form_context(name, builder))
         yield
-        form_contexts.pop        
+        form_contexts.pop
       end
       
+      def form_tag(*args, &blk)
+        _singleton_form_context.form_tag(*args, &blk)
+      end
+            
       def form_for(name, attrs = {}, &blk)
         with_form_context(name, attrs.delete(:builder)) do
           current_form_context.form_tag(attrs, &blk)
@@ -49,7 +49,7 @@ module Merb
       end
       
       %w(text radio password hidden).each do |kind|
-        self.class_eval <<-RUBY
+        self.class_eval <<-RUBY, __FILE__, __LINE__ + 1
           def #{kind}_control(name, attrs = {})
             current_form_context.#{kind}_control(name, attrs)
           end

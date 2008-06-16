@@ -47,7 +47,7 @@ module Merb
     end
     
     %w(text radio password hidden).each do |kind|
-      self.class_eval <<-RUBY
+      self.class_eval <<-RUBY, __FILE__, __LINE__ + 1
         def #{kind}_control(method, attrs)
           name = "\#{@name}[\#{method}]"
           update_control_fields(method, attrs, "#{kind}")
@@ -79,7 +79,7 @@ module Merb
     end
     
     %w(text radio password).each do |kind|
-      self.class_eval <<-RUBY
+      self.class_eval <<-RUBY, __FILE__, __LINE__ + 1
         def #{kind}_field(attrs)
           label(attrs) + super
         end
