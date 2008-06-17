@@ -48,14 +48,14 @@ module Merb
         end
       end
       
-      %w(text radio password hidden checkbox radio_group).each do |kind|
+      %w(text radio password hidden checkbox radio_group text_area).each do |kind|
         self.class_eval <<-RUBY, __FILE__, __LINE__ + 1
-          def #{kind}_control(name, attrs = {})
-            current_form_context.#{kind}_control(name, attrs)
+          def #{kind}_control(*args)
+            current_form_context.#{kind}_control(*args)
           end
           
-          def #{kind}_field(attrs = {})
-            _singleton_form_context.#{kind}_field(attrs)
+          def #{kind}_field(*args)
+            _singleton_form_context.#{kind}_field(*args)
           end
         RUBY
       end

@@ -566,37 +566,39 @@ describe "radio button groups (data bound)" do
     end
   end
 end
-# 
-# describe "text area (basic)" do
-#   it "should should return a basic text area based on the values passed in" do
-#     text_area_field("foo", :name => "foo").should match_tag(:textarea, :name => "foo")
-#   end
-# 
-#   it "should handle a nil content" do
-#     text_area_field(nil, :name => "foo").should == "<textarea name=\"foo\"></textarea>"
-#   end
-# 
-#   it "should handle a nil attributes hash" do
-#     text_area_field("CONTENT", nil).should == "<textarea>CONTENT</textarea>"
-#   end
-# 
-#   it "should render a label when the label is passed in" do
-#     result = text_area_field( "CONTENT", :name => "foo", :value => "bar", :label => "LABEL")
-#     result.should match(/<label.*>LABEL<\/label><textarea/)
-#     res = result.scan(/<[^>]*>/)
-#     res[1].should_not match_tag(:textarea, :label => "LABEL")
-#   end
-# end
-# 
-# describe "text area (data bound)" do
-#   it_should_behave_like "FakeController"
-# 
-#   it "should provide :id attribute" do
-#     form_for :obj do
-#       text_area_control( :foo ).should match_tag(:textarea, :id => 'fake_model_foo')
-#     end
-#   end
-# end
+
+describe "text area (basic)" do
+  it_should_behave_like "FakeController"
+  
+  it "should should return a basic text area based on the values passed in" do
+    text_area_field("foo", :name => "foo").should match_tag(:textarea, :name => "foo")
+  end
+
+  it "should handle a nil content" do
+    text_area_field(nil, :name => "foo").should == "<textarea name=\"foo\"></textarea>"
+  end
+
+  it "should handle a nil attributes hash" do
+    text_area_field("CONTENT", nil).should == "<textarea>CONTENT</textarea>"
+  end
+
+  it "should render a label when the label is passed in" do
+    result = text_area_field( "CONTENT", :name => "foo", :value => "bar", :label => "LABEL")
+    result.should match(/<label.*>LABEL<\/label><textarea/)
+    res = result.scan(/<[^>]*>/)
+    res[1].should_not match_tag(:textarea, :label => "LABEL")
+  end
+end
+
+describe "text area (data bound)" do
+  it_should_behave_like "FakeController"
+
+  it "should provide :id attribute" do
+    form_for @obj do
+      text_area_control( :foo ).should match_tag(:textarea, :id => 'fake_model_foo')
+    end
+  end
+end
 # 
 # describe "select (data bound)" do
 # 

@@ -63,15 +63,15 @@ module Merb
     end
     
     public
-    %w(text radio password hidden checkbox).each do |kind|
+    %w(text radio password hidden checkbox text_area).each do |kind|
       self.class_eval <<-RUBY, __FILE__, __LINE__ + 1
-        def #{kind}_control(method, attrs)
+        def #{kind}_control(method, attrs = {})
           name = "\#{@name}[\#{method}]"
           update_control_fields(method, attrs, "#{kind}")
           #{kind}_field({:name => name, :value => @obj.send(method)}.merge(attrs))
         end
         
-        def #{kind}_field(attrs)
+        def #{kind}_field(attrs = {})
           update_fields(attrs, "#{kind}")
           self_closing_tag(:input, {:type => "#{kind}"}.merge(attrs))
         end
@@ -92,6 +92,17 @@ module Merb
       end.join
     end
     
+    def text_area_field(contents, attrs = {})
+      tag(:textarea, contents, attrs)
+    end
+    
+    def text_area_control(method, attrs = {})
+      name = "#{@name}[#{method}]"
+      update_control_fields(method, attrs, "text_area")
+      text_area_field(@obj.send(method), 
+        {:name => name}.merge(attrs))
+    end
+    
   end
   
   class CompleteForm < Form
@@ -106,6 +117,7 @@ module Merb
     end
     
     def label(attrs)
+      attrs ||= {}
       for_attr = attrs[:id] ? {:for => attrs[:id]} : {}
       if label_text = attrs.delete(:label)
         tag(:label, label_text, for_attr)
@@ -116,18 +128,22 @@ module Merb
     
     %w(text password).each do |kind|
       self.class_eval <<-RUBY, __FILE__, __LINE__ + 1
-        def #{kind}_field(attrs)
+        def #{kind}_field(attrs = {})
           label(attrs) + super
         end
       RUBY
     end
     
-    def checkbox_field(attrs)
+    def text_area_field(contents, attrs = {})
+      label(attrs) + super
+    end
+    
+    def checkbox_field(attrs = {})
       label_text = label(attrs)
       super + label_text
     end
     
-    def radio_field(attrs)
+    def radio_field(attrs = {})
       label_text = label(attrs)
       super + label_text
     end
@@ -141,7 +157,7 @@ module Merb
       super
     end
     
-    def hidden_field(attrs)
+    def hidden_field(attrs = {})
       attrs.delete(:label)
       super
     end
