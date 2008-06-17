@@ -599,130 +599,150 @@ describe "text area (data bound)" do
     end
   end
 end
-# 
-# describe "select (data bound)" do
-# 
-#   it_should_behave_like "FakeController"
-# 
-#   it "should render the select tag with the correct id and name" do
-#     form_for :obj do
-#       content = select_control( :foo )
-#       content.should match_tag( :select, :id => "fake_model_foo", :name => "fake_model[foo]" )
-#     end
-#   end
-# 
-#   it "should include a blank option" do
-#     form_for :obj do
-#       content = select_control( :foo, :include_blank => true )
-#       content.should match_tag( :option, :value => '')
-#     end
-#   end
-# 
-#   it "should render a prompt option without a value" do
-#     form_for :obj do
-#       content = select_control( :foo, :prompt => "Choose" )
-#     end
-#   end
-# 
-#   it "should render a select tag with options" do
-#     form_for :obj do
-#       content = select_control( :foo, :class => 'class1 class2', :title => 'This is the title' )
-#       content.should match_tag( :select, :class => "class1 class2", :title=> "This is the title" )
-#     end
-#   end
-# 
-#   it "should render a select tag with options and a blank option" do
-#     form_for :obj do
-#       content = select_control( :foo, :title => "TITLE", :include_blank => true )
-#       content.should match_tag( :select, :title => "TITLE" )
-#       content.should match_tag( :option, :value => '' )
-#     end
-#   end
-# 
-#   it "should render the text as the value if no text_method is specified" do
-#     form_for :obj do
-#       content = select_control( :foo, :collection => [FakeModel] )
-#       content.should match_tag( :option, :value => "FakeModel" )
-#     end
-#   end
-# 
-# end
-# 
-# describe "option tag generation (data bound)" do
-#   it_should_behave_like "FakeController"
-# 
-#   it "should use text_method and value_method for tag generation" do
-#     content = options_from_collection_for_select( [FakeModel.new, FakeModel2.new], :text_method => 'foo', :value_method => 'bar' )
-#     content.should match_tag( :option, :content => "foowee", :value => "7" )
-#     content.should match_tag( :option, :content => "foowee2", :value => "barbar" )
-#   end
-# 
-#   it "should render a hash of arrays as a grouped select box" do
-#     @model1 = FakeModel.new ; @model1.make = "Ford"   ; @model1.model = "Mustang"   ; @model1.vin = '1'
-#     @model2 = FakeModel.new ; @model2.make = "Ford"   ; @model2.model = "Falcon"    ; @model2.vin = '2'
-#     @model3 = FakeModel.new ; @model3.make = "Holden" ; @model3.model = "Commodore" ; @model3.vin = '3'
-# 
-#     collection = [@model1, @model2, @model3].inject({}) {|s,e| (s[e.make] ||= []) << e; s }
-#     content = options_from_collection_for_select(collection, :text_method => 'model', :value_method => 'vin', :selected => '1')
-# 
-#     content.should match_tag( :optgroup, :label => "Ford" )
-#     content.should match_tag( :option, :selected => "selected", :value => "1", :content => "Mustang" )
-#     content.should match_tag( :option, :value => "2", :content => "Falcon" )
-#     content.should match_tag( :optgroup, :label => "Holden" )
-#     content.should match_tag( :option, :value => "3", :content => "Commodore" )
-#   end
-# 
-#   it "should humanize and titlize keys in the label for the option group" do
-#     collection = { :some_snake_case_key => [FakeModel] }
-#     form_for :obj do
-#       content = select_control( :foo, :collection => collection )
-#       content.should match_tag( :optgroup, :label => "Some Snake Case Key" )
-#     end
-#   end
-# 
-# 
-# end
-# 
-# require "hpricot"
-# 
-# describe "option tags generation (basic)" do
-#   it_should_behave_like "FakeController"
-# 
-#   before do
-#     @collection = [['rabbit','Rabbit'],['horse','Horse'],['bird','Bird']]
-#   end
-# 
-#   it "should provide an option tag for each item in the collection" do
-#     result = options_for_select( @collection )
-#     doc = Hpricot( result )
-#     (doc/"option").size.should == 3
-#   end
-# 
-#   it "should provide a blank option" do
-#     content = options_for_select(@collection, :include_blank => true )
-#     content.should match_tag( :option, :value => '' )
-#   end
-# 
-#   it "should provide a prompt option" do
-#     content = options_for_select( [], :prompt => 'Choose' )
-#     content.should match_tag( :option, :value => '', :content => 'Choose' )
-#   end
-# 
-#   it "should provide selected options by value" do
-#     content = options_for_select( [['rabbit','Rabbit'],['chicken','Chicken']], :selected => 'rabbit' )
-#     content.should match_tag( :option, :value => 'rabbit', :selected => 'selected', :content => 'Rabbit' )
-#     content.should_not match_tag( :option, :value => 'chicken', :selected => nil, :content => 'Chicken' )
-#   end
-# 
-#   it "should render a hash of options as optgroup" do
-#     collection = { :fruit => [['orange','Orange'],['banana','Banana']], :vegatables => [['corn','Corn']]}
-#     content = options_for_select(collection, :selected => 'banana')
-#     content.should match_tag( :optgroup, :label => 'Fruit' )
-#     content.should match_tag( :optgroup, :label => 'Vegatables' )
-#     content.should match_tag( :option, :value => 'banana', :selected => 'selected', :content => 'Banana' )
-#   end
-# 
-# end
+
+describe "select (data bound)" do
+
+  it_should_behave_like "FakeController"
+
+  it "should render the select tag with the correct id and name" do
+    form_for @obj do
+      content = select_control( :foo )
+      content.should match_tag( :select, :id => "fake_model_foo", :name => "fake_model[foo]" )
+    end
+  end
+
+  it "should include a blank option" do
+    form_for @obj do
+      content = select_control( :foo, :include_blank => true )
+      content.should match_tag( :option, :value => '')
+    end
+  end
+
+  it "should render a prompt option without a value" do
+    form_for @obj do
+      content = select_control( :foo, :prompt => "Choose" )
+    end
+  end
+
+  it "should render a select tag with options" do
+    form_for @obj do
+      content = select_control( :foo, :class => 'class1 class2', :title => 'This is the title' )
+      content.should match_tag( :select, :class => "class1 class2", :title=> "This is the title" )
+    end
+  end
+
+  it "should render a select tag with options and a blank option" do
+    form_for @obj do
+      content = select_control( :foo, :title => "TITLE", :include_blank => true )
+      content.should match_tag( :select, :title => "TITLE" )
+      content.should match_tag( :option, :value => '' )
+    end
+  end
+
+  # Not sure how this makes any sense
+  # ---------------------------------
+  #
+  # it "should render the text as the value if no text_method is specified" do
+  #   form_for @obj do
+  #     content = select_control( :foo, :collection => [FakeModel] )
+  #     content.should match_tag( :option, :value => "FakeModel" )
+  #   end
+  # end
+
+end
+
+describe "option tag generation (data bound)" do
+  it_should_behave_like "FakeController"
+
+  it "should use text_method and value_method for tag generation" do
+    form_for @obj do
+      content = select_control( :foo, :collection => [FakeModel.new, FakeModel2.new],
+        :text_method => "foo", :value_method => "bar" )
+      content.should match_tag( :option, :content => "foowee", :value => "7" )
+      content.should match_tag( :option, :content => "foowee2", :value => "barbar" )
+    end
+    
+    # content = options_from_collection_for_select( [FakeModel.new, FakeModel2.new], :text_method => 'foo', :value_method => 'bar' )
+    # content.should match_tag( :option, :content => "foowee", :value => "7" )
+    # content.should match_tag( :option, :content => "foowee2", :value => "barbar" )
+  end
+
+  it "should render a hash of arrays as a grouped select box" do
+    @model1 = FakeModel.new ; @model1.make = "Ford"   ; @model1.model = "Mustang"   ; @model1.vin = '1'
+    @model2 = FakeModel.new ; @model2.make = "Ford"   ; @model2.model = "Falcon"    ; @model2.vin = '2'
+    @model3 = FakeModel.new ; @model3.make = "Holden" ; @model3.model = "Commodore" ; @model3.vin = '3'
+
+    form_for @model1 do
+      collection = [@model1, @model2, @model3].inject({}) {|s,e| (s[e.make] ||= []) << e; s }
+      content = select_control(:vin, :text_method => "model",
+        :collection => collection)
+      content.should match_tag( :optgroup, :label => "Ford" )
+      content.should match_tag( :option, :selected => "selected", :value => "1", :content => "Mustang" )
+      content.should match_tag( :option, :value => "2", :content => "Falcon" )
+      content.should match_tag( :optgroup, :label => "Holden" )
+      content.should match_tag( :option, :value => "3", :content => "Commodore" )      
+    end
+
+    # collection = [@model1, @model2, @model3].inject({}) {|s,e| (s[e.make] ||= []) << e; s }
+    # content = options_from_collection_for_select(collection, :text_method => 'model', :value_method => 'vin', :selected => '1')
+
+  end
+
+  # Is this really worth the extra speed hit? I'm thinking not
+  # ----------------------------------------------------------
+  #
+  # it "should humanize and titlize keys in the label for the option group" do
+  #   collection = { :some_snake_case_key => [FakeModel.new] }
+  #   form_for @obj do
+  #     content = select_control( :foo, :collection => collection )
+  #     content.should match_tag( :optgroup, :label => "Some Snake Case Key" )
+  #   end
+  # end
+
+
+end
+
+require "hpricot"
+
+describe "option tags generation (basic)" do
+  it_should_behave_like "FakeController"
+
+  before do
+    @collection = [['rabbit','Rabbit'],['horse','Horse'],['bird','Bird']]
+  end
+
+  it "should provide an option tag for each item in the collection" do
+    result = select_field(:collection => @collection)
+    doc = Hpricot( result )
+    (doc/"option").size.should == 3
+  end
+
+  it "should provide a blank option" do
+    content = select_field(:collection => @collection, :include_blank => true )
+    content.should match_tag( :option, :value => '' )
+  end
+
+  it "should provide a prompt option" do
+    content = select_field( :collection => [], :prompt => 'Choose' )
+    content.should match_tag( :option, :value => '', :content => 'Choose' )
+  end
+
+  it "should provide selected options by value" do
+    content = select_field( :collection => [['rabbit','Rabbit'],['chicken','Chicken']], 
+      :selected => 'rabbit' )
+    content.should match_tag( :option, :value => 'rabbit', :selected => 'selected', :content => 'Rabbit' )
+    content.should_not match_tag( :option, :value => 'chicken', :selected => nil, :content => 'Chicken' )
+  end
+
+  it "should render a hash of options as optgroup" do
+    collection = { "Fruit" => [['orange','Orange'],['banana','Banana']], "Vegetables" => [['corn','Corn']]}
+    content = select_field(:collection => collection, :selected => 'banana')
+    content.should match_tag( :optgroup, :label => 'Fruit' )
+    content.should match_tag( :optgroup, :label => 'Vegetables' )
+    content.should match_tag( :option, :value => 'banana', :selected => 'selected', :content => 'Banana' )
+  end
+
+end
 # 
 # describe "fieldset generation (basic)" do
 #   it_should_behave_like "FakeController"

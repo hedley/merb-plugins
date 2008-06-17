@@ -41,6 +41,10 @@ module Merb
     end
 
     def update_control_fields(method, attrs, type)
+      case type
+      when "select"
+        update_select_control_fields(method, attrs)
+      end
     end
     
     def update_fields(attrs, type)
@@ -50,6 +54,12 @@ module Merb
       end
     end
     
+    def update_select_control_fields(method, attrs)
+      attrs[:value_method] ||= method
+      attrs[:text_method] ||= attrs[:value_method] || :to_s
+      attrs[:selected] ||= @obj.send(attrs[:value_method])
+    end
+    
     def update_checkbox_field(attrs)
       on, off = attrs.delete(:on) || "1", attrs.delete(:off) || "0"
       checked = considered_true?(attrs.delete(:value))
@@ -57,16 +67,10 @@ module Merb
       attrs[:checked] = "checked" if checked
     end
 
-    private
-    def considered_true?(value)
-      value && value != "0" && value != 0
-    end
-    
-    public
-    %w(text radio password hidden checkbox text_area).each do |kind|
+    %w(text radio password hidden checkbox).each do |kind|
       self.class_eval <<-RUBY, __FILE__, __LINE__ + 1
         def #{kind}_control(method, attrs = {})
-          name = "\#{@name}[\#{method}]"
+          name = control_name(method)
           update_control_fields(method, attrs, "#{kind}")
           #{kind}_field({:name => name, :value => @obj.send(method)}.merge(attrs))
         end
@@ -78,9 +82,15 @@ module Merb
       RUBY
     end
     
-    def radio_group_item(method, attrs)
-      attrs.merge!(:checked => "checked") if attrs[:checked]
-      radio_control(method, attrs)
+    def select_control(method, attrs = {})
+      name = control_name(method)
+      update_control_fields(method, attrs, "select")
+      select_field({:name => name}.merge(attrs))
+    end
+    
+    def select_field(attrs = {})
+      update_fields(attrs, "select")
+      tag(:select, options_for(attrs), attrs)
     end
     
     def radio_group_control(method, arr)
@@ -93,6 +103,7 @@ module Merb
     end
     
     def text_area_field(contents, attrs = {})
+      update_fields(attrs, "text_area")
       tag(:textarea, contents, attrs)
     end
     
@@ -103,6 +114,57 @@ module Merb
         {:name => name}.merge(attrs))
     end
     
+    private
+    def control_name(method)
+      "#{@name}[#{method}]"
+    end
+    
+    def options_for(attrs)
+      if attrs.delete(:include_blank)
+        b = tag(:option, "", :value => "")
+      elsif prompt = attrs.delete(:prompt)
+        b = tag(:option, prompt, :value => "")
+      else
+        b = ""
+      end
+      
+      # yank out the options attrs
+      collection = attrs.delete(:collection) || []
+      selected = attrs.delete(:selected)
+      text_method = @obj ? attrs.delete(:text_method) : :last
+      value_method = @obj ? attrs.delete(:value_method) : :first
+
+      # if the collection is a Hash, optgroups are a-coming
+      if collection.is_a?(Hash)
+        options = collection.map do |g,col|
+          tag(:optgroup, 
+            options(col, text_method, value_method, attrs, selected, ""),
+            :label => g)
+        end + [b]
+        options.join
+      else
+        options(collection, text_method, value_method, attrs, selected, b)
+      end
+    end
+    
+    def options(col, text_meth, value_meth, attrs, sel, b)
+      options = col.map do |item|
+        value = item.send(value_meth)
+        attrs.merge!(:value => value)
+        attrs.merge!(:selected => "selected") if value == sel
+        tag(:option, item.send(text_meth), attrs)
+      end + [b]
+      options.join
+    end
+    
+    def radio_group_item(method, attrs)
+      attrs.merge!(:checked => "checked") if attrs[:checked]
+      radio_control(method, attrs)
+    end
+    
+    def considered_true?(value)
+      value && value != "0" && value != 0
+    end
   end
   
   class CompleteForm < Form
@@ -112,7 +174,10 @@ module Merb
     end
     
     def update_fields(attrs, type)
-      add_class(attrs, type)
+      case type
+      when "text", "radio", "password", "hidden", "checkbox"
+        add_class(attrs, type)
+      end
       super
     end
     
