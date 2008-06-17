@@ -44,14 +44,31 @@ module Merb
     end
     
     def update_fields(attrs, type)
+      case type
+      when "checkbox"
+        update_checkbox_field(attrs)
+      end
     end
     
-    %w(text radio password hidden).each do |kind|
+    def update_checkbox_field(attrs)
+      on, off = attrs.delete(:on) || "1", attrs.delete(:off) || "0"
+      checked = considered_true?(attrs.delete(:value))
+      attrs[:value] = checked ? on : off
+      attrs[:checked] = "checked" if checked
+    end
+
+    private
+    def considered_true?(value)
+      value && value != "0" && value != 0
+    end
+    
+    public
+    %w(text radio password hidden checkbox).each do |kind|
       self.class_eval <<-RUBY, __FILE__, __LINE__ + 1
         def #{kind}_control(method, attrs)
           name = "\#{@name}[\#{method}]"
           update_control_fields(method, attrs, "#{kind}")
-          #{kind}_field(attrs.merge(:name => name, :value => @obj.send(method)))
+          #{kind}_field({:name => name, :value => @obj.send(method)}.merge(attrs))
         end
         
         def #{kind}_field(attrs)
@@ -60,12 +77,26 @@ module Merb
         end
       RUBY
     end
-
+    
+    def radio_group_item(method, attrs)
+      attrs.merge!(:checked => "checked") if attrs[:checked]
+      radio_control(method, attrs)
+    end
+    
+    def radio_group_control(method, arr)
+      val = @obj.send(method)
+      arr.map do |attrs|
+        attrs = {:value => attrs} unless attrs.is_a?(Hash)
+        attrs[:checked] ||= (val == attrs[:value])
+        radio_group_item(method, attrs)
+      end.join
+    end
+    
   end
   
   class CompleteForm < Form
     def update_control_fields(method, attrs, type)
-      attrs.merge!(:id => "#{@name}_#{method}")
+      attrs.merge!(:id => "#{@name}_#{method}") unless attrs[:id]
       super
     end
     
@@ -75,15 +106,39 @@ module Merb
     end
     
     def label(attrs)
-      (label_text = attrs.delete(:label)) ? tag(:label, label_text) : ""
+      for_attr = attrs[:id] ? {:for => attrs[:id]} : {}
+      if label_text = attrs.delete(:label)
+        tag(:label, label_text, for_attr)
+      else 
+        ""
+      end
     end
     
-    %w(text radio password).each do |kind|
+    %w(text password).each do |kind|
       self.class_eval <<-RUBY, __FILE__, __LINE__ + 1
         def #{kind}_field(attrs)
           label(attrs) + super
         end
       RUBY
+    end
+    
+    def checkbox_field(attrs)
+      label_text = label(attrs)
+      super + label_text
+    end
+    
+    def radio_field(attrs)
+      label_text = label(attrs)
+      super + label_text
+    end
+    
+    def radio_group_item(method, attrs)
+      unless attrs[:id]
+        attrs.merge!(:id => "#{@name}_#{method}_#{attrs[:value]}")
+      end
+      
+      attrs.merge!(:label => attrs[:label] || attrs[:value])
+      super
     end
     
     def hidden_field(attrs)

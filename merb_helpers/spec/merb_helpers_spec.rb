@@ -249,7 +249,7 @@ describe "radio_control (data bound)" do
     form_for @obj do
       _buffer << radio_control(:foo, :label => "LABEL")
     end
-    _buffer.should match(/<label.*>LABEL<\/label><input/)
+    _buffer.should match(/<input.*><label.*>LABEL<\/label>/)
     res = _buffer.scan(/<[^>]*>/)
     res[2].should_not match_tag(:input, :label => "LABEL")
   end
@@ -336,102 +336,102 @@ describe "password_control (data bound)" do
 
 end
 
-# describe "checkbox_field (basic)" do
-#   it_should_behave_like "FakeController"
-#   
-#   it "should return a basic checkbox based on the values passed in" do
-#     checkbox_field(:name => "foo", :checked => "checked").should match_tag(:input, :class => "checkbox", :name => "foo", :checked => "checked")
-#   end
-# 
-#   it "should provide an additional label tag if the :label option is passed in" do
-#     result = checkbox_field(:label => "LABEL" )
-#     result.should match(/<input.*><label>LABEL<\/label>/)
-#     res = result.scan(/<[^>]*>/)
-#     res[0].should_not match_tag(:input, :label => "LABEL")
-#   end
-# end
-# 
-# describe "checkbox_control (data bound)" do
-#   it_should_behave_like "FakeController"
-# 
-#   it "should take a string and return a useful checkbox control" do
-#     form_for :obj do
-#       checkbox_control(:baz).should match_tag(:input, :type =>"checkbox", :name => "fake_model[baz]", :class => "checkbox", :value => "1", :checked => "checked", :id => "fake_model_baz")
-#       checkbox_control(:bat).should match_tag(:input, :type =>"checkbox", :name => "fake_model[bat]", :class => "checkbox", :value => "0")
-#     end
-#   end
-# 
-#   it "should support models from datamapper" do
-#     @dm_obj =  FakeDMModel.new
-#     form_for :dm_obj do
-#       checkbox_control(:baz).should match_tag(:input,
-#                                               :type    =>"checkbox",
-#                                               :name    => "fake_dm_model[baz]",
-#                                               :class   => "checkbox",
-#                                               :value   => "1",
-#                                               :checked => "checked",
-#                                               :id      => "fake_dm_model_baz")
-#       checkbox_control(:bat).should match_tag(:input, :type =>"checkbox", :name => "fake_dm_model[bat]", :class => "checkbox", :value => "0")
-#     end
-#   end
-# 
-#   it "should allow a user to set the :off value" do
-#     form_for :obj do
-#       checkbox_control(:baz, :off => "off", :on => "on").should match_tag(:input, :type =>"checkbox", :name => "fake_model[baz]", :class => "checkbox", :value => "on", :checked => "checked")
-#       checkbox_control(:bat, :off => "off", :on => "on").should match_tag(:input, :type =>"checkbox", :name => "fake_model[bat]", :class => "checkbox", :value => "off")
-#     end
-#   end
-# 
-#   it "should evaulate nil, false, 0 and '0' to false. All else to true" do
-#     send(:col_val_to_bool, nil).should   == false
-#     send(:col_val_to_bool, false).should == false
-#     send(:col_val_to_bool, 0).should     == false
-#     send(:col_val_to_bool, '0').should   == false
-#     send(:col_val_to_bool, 1).should     == true
-#     send(:col_val_to_bool, '1').should   == true
-#     send(:col_val_to_bool, true).should  == true
-#   end
-# 
-#   it "should render controls with errors if their attribute contains an error" do
-#     form_for :obj do
-#       checkbox_control(:bazbad).should match_tag(:input, :type =>"checkbox", :name => "fake_model[bazbad]",
-#         :class => "error checkbox", :value => "1", :checked => "checked")
-#       checkbox_control(:batbad).should match_tag(:input, :type =>"checkbox", :name => "fake_model[batbad]",
-#         :class => "error checkbox", :value => "0")
-#     end
-#   end
-# 
-#   it "should provide an additional label tag if the :label option is passed in" do
-#     form_for :obj do
-#       _buffer << checkbox_control(:foo, :label => "LABEL")
-#     end
-#     _buffer.should match( /<input.*><label.*>LABEL<\/label>/ )
-#     res = _buffer.scan(/<[^>]*>/)
-#     res[0].should_not match_tag(:input, :label => "LABEL")
-#     end
-# 
-#     it "should not errorify the field for a new object" do
-#       f = form_for :obj do
-#         checkbox_control(:foo, :bar =>"7").should_not match_tag(:input, :type => "checkbox", :class => "error checkbox")
-#       end
-#     end
-# 
-#     it "should errorify a field for a model with errors" do
-#       model = mock("model")
-#       model.stub!(:new_record?).and_return(true)
-#       model.stub!(:class).and_return("MyClass")
-#       model.stub!(:foo).and_return("FOO")
-#       errors = mock("errors")
-#       errors.should_receive(:on).with(:foo).and_return(true)
-# 
-#       model.stub!(:errors).and_return(errors)
-# 
-#       f = form_for model do
-#         checkbox_control(:foo, :bar =>"7").should match_tag(:input, :type => "checkbox", :class => "error checkbox")
-#       end
-#     end
-# end
-# 
+describe "checkbox_field (basic)" do
+  it_should_behave_like "FakeController"
+  
+  it "should return a basic checkbox based on the values passed in" do
+    checkbox_field(:name => "foo", :checked => "checked").should match_tag(:input, :class => "checkbox", :name => "foo", :checked => "checked")
+  end
+
+  it "should provide an additional label tag if the :label option is passed in" do
+    result = checkbox_field(:label => "LABEL" )
+    result.should match(/<input.*><label>LABEL<\/label>/)
+    res = result.scan(/<[^>]*>/)
+    res[0].should_not match_tag(:input, :label => "LABEL")
+  end
+end
+
+describe "checkbox_control (data bound)" do
+  it_should_behave_like "FakeController"
+
+  it "should take a string and return a useful checkbox control" do
+    form_for @obj do
+      checkbox_control(:baz).should match_tag(:input, :type =>"checkbox", :name => "fake_model[baz]", :class => "checkbox", :value => "1", :checked => "checked", :id => "fake_model_baz")
+      checkbox_control(:bat).should match_tag(:input, :type =>"checkbox", :name => "fake_model[bat]", :class => "checkbox", :value => "0")
+    end
+  end
+
+  it "should support models from datamapper" do
+    @dm_obj =  FakeDMModel.new
+    form_for @dm_obj do
+      checkbox_control(:baz).should match_tag(:input,
+                                              :type    =>"checkbox",
+                                              :name    => "fake_dm_model[baz]",
+                                              :class   => "checkbox",
+                                              :value   => "1",
+                                              :checked => "checked",
+                                              :id      => "fake_dm_model_baz")
+      checkbox_control(:bat).should match_tag(:input, :type =>"checkbox", :name => "fake_dm_model[bat]", :class => "checkbox", :value => "0")
+    end
+  end
+
+  it "should allow a user to set the :off value" do
+    form_for @obj do
+      checkbox_control(:baz, :off => "off", :on => "on").should match_tag(:input, :type =>"checkbox", :name => "fake_model[baz]", :class => "checkbox", :value => "on", :checked => "checked")
+      checkbox_control(:bat, :off => "off", :on => "on").should match_tag(:input, :type =>"checkbox", :name => "fake_model[bat]", :class => "checkbox", :value => "off")
+    end
+  end
+
+  it "should evaulate nil, false, 0 and '0' to false. All else to true" do
+    checkbox_field(:name => "foo", :value => nil).should match_tag(:input, :value => "0")
+    checkbox_field(:name => "foo", :value => false).should match_tag(:input, :value => "0")
+    checkbox_field(:name => "foo", :value => 0).should match_tag(:input, :value => "0")
+    checkbox_field(:name => "foo", :value => "0").should match_tag(:input, :value => "0")
+    checkbox_field(:name => "foo", :value => 1).should match_tag(:input, :value => "1")
+    checkbox_field(:name => "foo", :value => "1").should match_tag(:input, :value => "1")
+    checkbox_field(:name => "foo", :value => true).should match_tag(:input, :value => "1")
+  end
+
+  it "should render controls with errors if their attribute contains an error" do
+    form_for @obj do
+      checkbox_control(:bazbad).should match_tag(:input, :type =>"checkbox", :name => "fake_model[bazbad]",
+        :class => "error checkbox", :value => "1", :checked => "checked")
+      checkbox_control(:batbad).should match_tag(:input, :type =>"checkbox", :name => "fake_model[batbad]",
+        :class => "error checkbox", :value => "0")
+    end
+  end
+
+  it "should provide an additional label tag if the :label option is passed in" do
+    form_for @obj do
+      _buffer << checkbox_control(:foo, :label => "LABEL")
+    end
+    _buffer.should match( /<input.*><label.*>LABEL<\/label>/ )
+    res = _buffer.scan(/<[^>]*>/)
+    res[0].should_not match_tag(:input, :label => "LABEL")
+    end
+
+    it "should not errorify the field for a new object" do
+      f = form_for @obj do
+        checkbox_control(:foo, :bar =>"7").should_not match_tag(:input, :type => "checkbox", :class => "error checkbox")
+      end
+    end
+
+    it "should errorify a field for a model with errors" do
+      model = mock("model")
+      model.stub!(:new_record?).and_return(true)
+      model.stub!(:class).and_return("MyClass")
+      model.stub!(:foo).and_return("FOO")
+      errors = mock("errors")
+      errors.should_receive(:on).with(:foo).and_return(true)
+
+      model.stub!(:errors).and_return(errors)
+
+      f = form_for model do
+        checkbox_control(:foo, :bar =>"7").should match_tag(:input, :type => "checkbox", :class => "error checkbox")
+      end
+    end
+end
+
 describe "hidden_field (basic)" do
   it_should_behave_like "FakeController"
   
@@ -491,79 +491,81 @@ describe "hidden_control (data bound)" do
   end
 
 end
-# 
-# describe "radio button (basic)" do
-#   it "should should return a basic radio button based on the values passed in" do
-#     radio_field(:name => "foo", :value => "bar", :id => "baz").should match_tag(:input, :type => "radio", :name => "foo", :value => "bar", :id => "baz")
-#   end
-# 
-#   it "should provide an additional label tag if the :label option is passed in" do
-#     result = radio_field(:name => "foo", :value => "bar", :label => "LABEL")
-#     # result.should match(/<label.*>LABEL<\/label><input/)
-#     # res = result.scan(/<[^>]*>/)
-#     # res[2].should_not match_tag(:input, :label => "LABEL")
-#     result.should match(/<input.*><label.*>LABEL<\/label>/)
-#     res = result.scan(/<[^>]*>/)
-#     res[0].should_not match_tag(:input, :label => "LABEL")
-#   end
-# 
-# end
-# 
-# describe "radio button groups (data bound)" do
-#   it_should_behave_like "FakeController"
-# 
-#   it "should return a group of radio buttons" do
-#     form_for :obj do
-#       radio = radio_group_control(:foo, [:foowee, :baree]).scan(/<[^>]*>/)
-#       radio[0].should match_tag(:input, :type => "radio", :name => "fake_model[foo]", :value => "foowee", :checked => "checked")
-#       radio[3].should match_tag(:input, :type => "radio", :name => "fake_model[foo]", :value => "baree")
-#       radio[4].should not_match_tag(:checked => "checked")
-#     end
-#   end
-# 
-#   it "should provide an additional label tag for each option in array-based options" do
-#     form_for :obj do
-#       radio = radio_group_control(:foo, [:foowee, :baree])
-#       radio.scan( /<input.*?><label.*?>(foowee|baree)<\/label>/ ).size.should == 2
-#       radio = radio.scan(/<[^>]*>/)
-#       radio[0].should_not match_tag(:input, :label => "LABEL")
-#       radio[3].should_not match_tag(:input, :label => "LABEL")
-#     end
-#   end
-# 
-#   it "should accept array of hashes as options" do
-#     form_for :obj do
-#       radio = radio_group_control(:foo, [{:value => 5, :label => "Five"}, {:value => 'bar', :label => 'Bar', :id => 'bar_id'}])
-#       radio.scan( /<input.*?><label.*?>(Five|Bar)<\/label>/ ).size.should == 2
-#       radio = radio.scan(/<[^>]*>/)
-#       radio.size.should == 6
-#       radio[0].should match_tag(:input, :value => 5)
-#       radio[1].should match_tag(:label)
-#       radio[2].should match_tag('/label')
-#       radio[3].should match_tag(:input, :value => 'bar', :id => 'bar_id')
-#       radio[4].should match_tag(:label, :for => 'bar_id')
-#       radio[5].should match_tag('/label')
-#     end
-#   end
-# 
-#   it "should provide autogenerated id for inputs" do
-#     form_for :obj do
-#       [ radio_group_control(:foo, [:bar]), radio_group_control(:foo, [{:value => 'bar', :label => 'Bar'}]) ].each do |radio|
-#         radio = radio.scan(/<[^>]*>/)
-#         radio[0].should match_tag(:input, :id => 'fake_model_foo_bar')
-#         radio[1].should match_tag(:label, :for => 'fake_model_foo_bar')
-#       end
-#     end
-#   end
-# 
-#   it "should override autogenerated id for inputs with hash-given id" do
-#     form_for :obj do
-#       radio = radio_group_control(:foo, [{:value => 'bar', :label => 'Bar', :id => 'bar_id'}]).scan(/<[^>]*>/)
-#       radio[0].should match_tag(:input, :id => 'bar_id')
-#       radio[1].should match_tag(:label, :for => 'bar_id')
-#     end
-#   end
-# end
+
+describe "radio button (basic)" do
+  it_should_behave_like "FakeController"
+  
+  it "should should return a basic radio button based on the values passed in" do
+    radio_field(:name => "foo", :value => "bar", :id => "baz").should match_tag(:input, :type => "radio", :name => "foo", :value => "bar", :id => "baz")
+  end
+
+  it "should provide an additional label tag if the :label option is passed in" do
+    result = radio_field(:name => "foo", :value => "bar", :label => "LABEL")
+    # result.should match(/<label.*>LABEL<\/label><input/)
+    # res = result.scan(/<[^>]*>/)
+    # res[2].should_not match_tag(:input, :label => "LABEL")
+    result.should match(/<input.*><label.*>LABEL<\/label>/)
+    res = result.scan(/<[^>]*>/)
+    res[0].should_not match_tag(:input, :label => "LABEL")
+  end
+
+end
+
+describe "radio button groups (data bound)" do
+  it_should_behave_like "FakeController"
+
+  it "should return a group of radio buttons" do
+    form_for @obj do
+      radio = radio_group_control(:foo, ["foowee", "baree"]).scan(/<[^>]*>/)
+      radio[0].should match_tag(:input, :type => "radio", :name => "fake_model[foo]", :value => "foowee", :checked => "checked")
+      radio[3].should match_tag(:input, :type => "radio", :name => "fake_model[foo]", :value => "baree")
+      radio[4].should not_match_tag(:checked => "checked")
+    end
+  end
+
+  it "should provide an additional label tag for each option in array-based options" do
+    form_for :obj do
+      radio = radio_group_control(:foo, ["foowee", "baree"])
+      radio.scan( /<input.*?><label.*?>(foowee|baree)<\/label>/ ).size.should == 2
+      radio = radio.scan(/<[^>]*>/)
+      radio[0].should_not match_tag(:input, :label => "LABEL")
+      radio[3].should_not match_tag(:input, :label => "LABEL")
+    end
+  end
+
+  it "should accept array of hashes as options" do
+    form_for @obj do
+      radio = radio_group_control(:foo, [{:value => 5, :label => "Five"}, {:value => 'bar', :label => 'Bar', :id => 'bar_id'}])
+      radio.scan( /<input.*?><label.*?>(Five|Bar)<\/label>/ ).size.should == 2
+      radio = radio.scan(/<[^>]*>/)
+      radio.size.should == 6
+      radio[0].should match_tag(:input, :value => 5)
+      radio[1].should match_tag(:label)
+      radio[2].should match_tag('/label')
+      radio[3].should match_tag(:input, :value => 'bar', :id => 'bar_id')
+      radio[4].should match_tag(:label, :for => 'bar_id')
+      radio[5].should match_tag('/label')
+    end
+  end
+
+  it "should provide autogenerated id for inputs" do
+    form_for @obj do
+      [ radio_group_control(:foo, [:bar]), radio_group_control(:foo, [{:value => 'bar', :label => 'Bar'}]) ].each do |radio|
+        radio = radio.scan(/<[^>]*>/)
+        radio[0].should match_tag(:input, :id => 'fake_model_foo_bar')
+        radio[1].should match_tag(:label, :for => 'fake_model_foo_bar')
+      end
+    end
+  end
+
+  it "should override autogenerated id for inputs with hash-given id" do
+    form_for @obj do
+      radio = radio_group_control(:foo, [{:value => 'bar', :label => 'Bar', :id => 'bar_id'}]).scan(/<[^>]*>/)
+      radio[0].should match_tag(:input, :id => 'bar_id')
+      radio[1].should match_tag(:label, :for => 'bar_id')
+    end
+  end
+end
 # 
 # describe "text area (basic)" do
 #   it "should should return a basic text area based on the values passed in" do
