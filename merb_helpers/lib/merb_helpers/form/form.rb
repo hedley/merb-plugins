@@ -9,10 +9,17 @@ module Merb
       @origin.concat(@origin.capture(&blk), blk.binding)
     end
     
-    def form_tag(attrs = {}, &blk)
-      fake_method_tag = process_form_attrs(attrs)
+    def fieldset(attrs, &blk)
+      legend = (l_attr = attrs.delete(:legend)) ? tag(:legend, l_attr) : ""
+      contents = tag(:fieldset, legend + @origin.capture(&blk), attrs)
+      @origin.concat(contents, blk.binding)
+    end
+    
+    def form_tag(attrs = {}, &blk)      
+      captured = @origin.capture(&blk)
+      fake_method_tag = process_form_attrs(attrs)      
       
-      contents = tag(:form, fake_method_tag + @origin.capture(&blk), attrs)
+      contents = tag(:form, fake_method_tag + captured, attrs)
       @origin.concat(contents, blk.binding)
     end
     
@@ -25,7 +32,7 @@ module Merb
       # passed in.
       method = @obj && !@obj.new_record? ? :put : method || :post
       
-      attrs[:enctype] = "multipart/form-data" if attrs.delete(:multipart)
+      attrs[:enctype] = "multipart/form-data" if attrs.delete(:multipart) || @multipart
       
       method == :post || method == :get ? "" : fake_out_method(attrs, method)
     end
@@ -51,6 +58,8 @@ module Merb
       case type
       when "checkbox"
         update_checkbox_field(attrs)
+      when "file"
+        @multipart = true
       end
     end
     
@@ -67,7 +76,7 @@ module Merb
       attrs[:checked] = "checked" if checked
     end
 
-    %w(text radio password hidden checkbox).each do |kind|
+    %w(text radio password hidden checkbox file).each do |kind|
       self.class_eval <<-RUBY, __FILE__, __LINE__ + 1
         def #{kind}_control(method, attrs = {})
           name = control_name(method)
@@ -80,6 +89,13 @@ module Merb
           self_closing_tag(:input, {:type => "#{kind}"}.merge(attrs))
         end
       RUBY
+    end
+    
+    def submit(contents, attrs)
+      attrs[:type] ||= "submit"
+      attrs[:name] ||= "submit"
+      update_fields(attrs, "submit")
+      tag(:button, contents, attrs)
     end
     
     def select_control(method, attrs = {})
@@ -175,7 +191,7 @@ module Merb
     
     def update_fields(attrs, type)
       case type
-      when "text", "radio", "password", "hidden", "checkbox"
+      when "text", "radio", "password", "hidden", "checkbox", "file"
         add_class(attrs, type)
       end
       super
@@ -191,12 +207,16 @@ module Merb
       end
     end
     
-    %w(text password).each do |kind|
+    %w(text password file).each do |kind|
       self.class_eval <<-RUBY, __FILE__, __LINE__ + 1
         def #{kind}_field(attrs = {})
           label(attrs) + super
         end
       RUBY
+    end
+    
+    def submit(contents, attrs = {})
+      label(attrs) + super
     end
     
     def text_area_field(contents, attrs = {})

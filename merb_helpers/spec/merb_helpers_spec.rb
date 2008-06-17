@@ -743,73 +743,78 @@ describe "option tags generation (basic)" do
   end
 
 end
-# 
-# describe "fieldset generation (basic)" do
-#   it_should_behave_like "FakeController"
-# 
-#   it "should provide legend option" do
-#     fieldset :legend => 'TEST' do
-#       _buffer << "CONTENT"
-#     end
-#     _buffer.should include("CONTENT")
-#     _buffer.should match_tag(:fieldset, {})
-#     _buffer.should match_tag(:legend, :content => 'TEST')
-#   end
-# end
-# 
-# describe "file_field (basic)" do
-#   it_should_behave_like "FakeController"
-# 
-#   it "should return a basic file field based on the values passed in" do
-#     file_field(:name => "foo", :value => "bar").should match_tag( :input, :type => "file", :name => "foo", :value => "bar")
-#   end
-# 
-#   it "should wrap the field in a label if the :label option is passed to the file_field" do
-#     result = file_field(:label => "LABEL" )
-#     result.should match(/<label>LABEL<\/label><input type="file" class="file"\s*\/>/)
-#   end
-# end
-# 
-# describe "file_control (data bound)" do
-#   it_should_behave_like "FakeController"
-# 
-#   it "should take a string object and return a useful file control" do
-#     f = form_for :obj do
-#       file_control(:foo).should match_tag(:input, :type => "file", :name => "fake_model[foo]", :value => "foowee")
-#     end
-#   end
-# 
-#   it "should take additional attributes and use them" do
-#     form_for :obj do
-#       file_control(:foo, :bar => "7").should match_tag(:input, :type => "file", :name => "fake_model[foo]", :value => "foowee", :bar => "7")
-#     end
-#   end
-# 
-#   it "should wrap the file_control in a label if the :label option is passed in" do
-#     form_for :obj do
-#       _buffer << text_control(:foo, :label => "LABEL")
-#     end
-#     _buffer.should match(/<label.*>LABEL<\/label><input/)
-#     res = _buffer.scan(/<[^>]*>/)
-#     res[2].should_not match_tag(:input, :label => "LABEL")
-#   end
-# end
-# 
-# describe "submit_field (basic)" do
-#   it "should return a basic submit input based on the values passed in" do
-#     submit_field(:name => "foo", :value => "bar").should match_tag(:input, :type => "submit", :name => "foo", :value => "bar")
-#   end
-# 
-#   it "should provide an additional label tag if the :label option is passed in" do
-#     result = submit_field(:value => "foo", :label => "LABEL")
-#     result.should match(/<input.*type="submit"/)
-#     result.should match(/<input.*name="submit"/)
-#     result.should match(/<input.*value="foo"/)
-#     result.should match(/<input.*label="LABEL"/)
-#   end
-# end
-# 
-# 
+
+describe "fieldset generation (basic)" do
+  it_should_behave_like "FakeController"
+
+  it "should provide legend option" do
+    fieldset :legend => 'TEST' do
+      _buffer << "CONTENT"
+    end
+    _buffer.should include("CONTENT")
+    _buffer.should match_tag(:fieldset, {})
+    _buffer.should match_tag(:legend, :content => 'TEST')
+  end
+end
+
+describe "file_field (basic)" do
+  it_should_behave_like "FakeController"
+
+  it "should return a basic file field based on the values passed in" do
+    file_field(:name => "foo", :value => "bar").should match_tag( :input, :type => "file", :name => "foo", :value => "bar")
+  end
+
+  it "should wrap the field in a label if the :label option is passed to the file_field" do
+    result = file_field(:label => "LABEL" )
+    result.should match(/<label>LABEL<\/label><input type="file" class="file"\s*\/>/)
+  end
+  
+end
+
+describe "file_control (data bound)" do
+  it_should_behave_like "FakeController"
+
+  it "should take a string object and return a useful file control" do
+    f = form_for @obj do
+      file_control(:foo).should match_tag(:input, :type => "file", :name => "fake_model[foo]", :value => "foowee")
+    end
+  end
+
+  it "should take additional attributes and use them" do
+    form_for @obj do
+      file_control(:foo, :bar => "7").should match_tag(:input, :type => "file", :name => "fake_model[foo]", :value => "foowee", :bar => "7")
+    end
+  end
+
+  it "should wrap the file_control in a label if the :label option is passed in" do
+    form_for @obj do
+      _buffer << text_control(:foo, :label => "LABEL")
+    end
+    _buffer.should match(/<label.*>LABEL<\/label><input/)
+    res = _buffer.scan(/<[^>]*>/)
+    res[2].should_not match_tag(:input, :label => "LABEL")
+  end
+end
+
+describe "submit_field (basic)" do
+  it_should_behave_like "FakeController"  
+  
+  it "should return a basic submit input based on the values passed in" do
+    submit("Done", :name => "foo", :value => "bar").
+      should match_tag(:button, 
+        :type => "submit", :name => "foo", 
+        :value => "bar", :content => "Done")
+  end
+
+  it "should provide an additional label tag if the :label option is passed in" do
+    result = submit("Done", :value => "foo", :label => "LABEL")
+    result.should match(/<button.*type="submit"/)
+    result.should match(/<button.*name="submit"/)
+    result.should match(/<button.*value="foo"/)
+    result.should match(/<label.*>LABEL<\/label>/)
+  end
+end
+
 # describe 'delete_button' do
 #   before :each do
 #     @obj = mock 'a model'
@@ -848,30 +853,6 @@ end
 #   it 'should allow you to modify the action so you can use routes with multiple params' do
 #     result = delete_button('/objs/2/subobjs/1')
 #     result.should match_tag(:form, :action => "/objs/2/subobjs/1", :method => "post")
-#   end
-# end
-# 
-# describe "optional_label" do
-#   it "should generate label tag if given attrs includes :label" do
-#     (optional_label({}) {''}).should == ''
-#     (optional_label({}) {'foo'}).should == 'foo'
-#     (optional_label({:label => 'foo'}) {''}).should == '<label>foo</label>'
-#     (optional_label({:label => {:title => 'foo', :class => 'bar'}}) {''}).should == '<label class="bar">foo</label>'
-#   end
-# 
-#   it "should provide :for attribute for label tag if given attrs include :id" do
-#     (optional_label({:label => 'foo', :id => 'bar'}) {''}).should == '<label for="bar">foo</label>'
-#   end
-# 
-#   it "should generate label before yielded content be default" do
-#     (optional_label({:label => 'foo'}) {'bar'}).should == '<label>foo</label>bar'
-#   end
-# 
-#   it "should generate label after yielded content if given label hash includes :align => :right" do
-#     (optional_label({:label => {:title => 'foo', :align => :right}}) {'bar'}).should  == 'bar<label>foo</label>'
-#     (optional_label({:label => {:title => 'foo', :align => 'right'}}) {'bar'}).should == 'bar<label>foo</label>'
-#     (optional_label({:label => {:title => 'foo', :align => :left}}) {'bar'}).should   == '<label>foo</label>bar'
-#     (optional_label({:label => {:title => 'foo', :align => 'foo'}}) {'bar'}).should   == '<label>foo</label>bar'
 #   end
 # end
 # 

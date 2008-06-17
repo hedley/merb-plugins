@@ -48,8 +48,18 @@ module Merb
         end
       end
       
+      def fieldset(attrs = {}, &blk)
+        _singleton_form_context.fieldset(attrs, &blk)
+      end
+      
+      def fieldset_for(name, attrs = {}, &blk)
+        with_form_context(name, attrs.delete(:builder)) do
+          current_form_context.fieldset(attrs, &blk)
+        end
+      end
+      
       %w(text radio password hidden checkbox 
-      radio_group text_area select).each do |kind|
+      radio_group text_area select file).each do |kind|
         self.class_eval <<-RUBY, __FILE__, __LINE__ + 1
           def #{kind}_control(*args)
             current_form_context.#{kind}_control(*args)
@@ -59,6 +69,10 @@ module Merb
             _singleton_form_context.#{kind}_field(*args)
           end
         RUBY
+      end
+      
+      def submit(contents, attrs = {})
+        _singleton_form_context.submit(contents, attrs)
       end
       
     end
