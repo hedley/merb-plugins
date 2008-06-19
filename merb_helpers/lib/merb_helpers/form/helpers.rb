@@ -71,6 +71,10 @@ module Merb
         RUBY
       end
       
+      def button(contents, attrs = {})
+        _singleton_form_context.button(contents, attrs)
+      end
+      
       def submit(contents, attrs = {})
         _singleton_form_context.submit(contents, attrs)
       end

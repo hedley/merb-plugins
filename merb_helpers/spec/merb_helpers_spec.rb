@@ -349,6 +349,46 @@ describe "checkbox_field (basic)" do
     res = result.scan(/<[^>]*>/)
     res[0].should_not match_tag(:input, :label => "LABEL")
   end
+  
+  it 'should remove the checked="checked" attribute if :checked is false or nil' do
+    checkbox_field(:name => "foo", :checked => false).should_not include('checked="')
+    checkbox_field(:name => "foo", :checked => nil).should_not   include('checked="')
+  end
+  
+  it 'should have the checked="checked" attribute if :checked => true is passed in' do
+    checkbox_field(:name => "foo", :checked => true).should include('checked="checked"')
+  end
+
+  it "should not be boolean by default" do
+    checkbox_field(:name => "foo", :value => "bar").should match_tag(:input, :type => "checkbox", :name => "foo", :value => "bar")
+  end
+
+  it "should add a hidden input if boolean" do
+    html = checkbox_field(:boolean => true)
+    html.should have_tag(:input, :type => "checkbox", :value => "1")
+    html.should have_tag(:input, :type => "hidden",   :value => "0")
+  end
+  
+  it "should not allow a :value param if boolean" do
+    lambda { checkbox_field(:boolean => true, :value => "woot") }.should raise_error(ArgumentError)
+    lambda { checkbox_field(:on => "YES", :off => "NO", :value => "woot") }.should raise_error(ArgumentError)
+  end
+
+  it "should not allow :boolean => false if :on and :off are specified" do
+    lambda { checkbox_field(:boolean => false, :on => "YES", :off => "NO") }.should raise_error(ArgumentError)
+    lambda { checkbox_field(:boolean => true,  :on => "YES", :off => "NO") }.should_not raise_error(ArgumentError)
+  end
+
+  it "should be boolean if :on and :off are specified" do
+    html = checkbox_field(:name => "foo", :on => "YES", :off => "NO")
+    html.should have_tag(:input, :type => "checkbox", :value => "YES", :name => "foo")
+    html.should have_tag(:input, :type => "hidden",   :value => "NO",  :name => "foo")
+  end
+
+  it "should have both :on and :off specified or neither" do
+    lambda { checkbox_field(:name => "foo", :on  => "YES") }.should raise_error(ArgumentError)
+    lambda { checkbox_field(:name => "foo", :off => "NO")  }.should raise_error(ArgumentError)
+  end
 end
 
 describe "checkbox_control (data bound)" do
@@ -428,6 +468,21 @@ describe "checkbox_control (data bound)" do
 
       f = form_for model do
         checkbox_control(:foo, :bar =>"7").should match_tag(:input, :type => "checkbox", :class => "error checkbox")
+      end
+    end
+    
+    it "should be boolean" do
+      form_for @obj do
+        html = checkbox_control(:baz)
+        html.should have_tag(:input, :type => "checkbox", :value => "1")
+        html.should have_tag(:input, :type => "hidden",   :value => "0")
+      end
+    end
+    
+    it "should be checked if the value of the model's attribute is equal to the value of :on" do
+      form_for @obj do
+        checkbox_control(:foo, :on => "foowee", :off => "NO").should match_tag(:input, :type =>"checkbox", :value => "foowee", :checked => "checked")
+        checkbox_control(:foo, :on => "YES",    :off => "NO").should_not include('checked="')
       end
     end
 end
@@ -796,20 +851,32 @@ describe "file_control (data bound)" do
   end
 end
 
-describe "submit_field (basic)" do
+describe "submit (basic)" do
   it_should_behave_like "FakeController"  
   
   it "should return a basic submit input based on the values passed in" do
-    submit("Done", :name => "foo", :value => "bar").
-      should match_tag(:button, 
-        :type => "submit", :name => "foo", 
-        :value => "bar", :content => "Done")
+    submit("Done", :name => "foo").should match_tag(:input, :type => "submit", :name => "foo", :value => "Done")
   end
 
   it "should provide an additional label tag if the :label option is passed in" do
-    result = submit("Done", :value => "foo", :label => "LABEL")
-    result.should match(/<button.*type="submit"/)
-    result.should match(/<button.*name="submit"/)
+    result = submit("Done", :label => "LABEL")
+    result.should match(/<input.*type="submit"/)
+    result.should match(/<input.*name="submit"/)
+    result.should match(/<input.*value="Done"/)
+    result.should match(/<label.*>LABEL<\/label>/)
+  end
+end
+
+describe "button (basic)" do
+  it_should_behave_like "FakeController"  
+  
+  it "should return a button based on the values passed in" do
+    button("Click Me", :type => "button", :name => "foo", :value => "bar").
+      should match_tag(:button, :type => "button", :name => "foo", :value => "bar", :content => "Click Me")
+  end
+
+  it "should provide an additional label tag if the :label option is passed in" do
+    result = button("Click Me", :value => "foo", :label => "LABEL")
     result.should match(/<button.*value="foo"/)
     result.should match(/<label.*>LABEL<\/label>/)
   end
