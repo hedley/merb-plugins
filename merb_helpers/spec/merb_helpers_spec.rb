@@ -389,6 +389,16 @@ describe "checkbox_field (basic)" do
     lambda { checkbox_field(:name => "foo", :on  => "YES") }.should raise_error(ArgumentError)
     lambda { checkbox_field(:name => "foo", :off => "NO")  }.should raise_error(ArgumentError)
   end
+  
+  it "should convert :value to a string on a non-boolean checkbox" do
+    checkbox_field(:name => "foo", :value => nil).should match_tag(:input, :value => "")
+    checkbox_field(:name => "foo", :value => false).should match_tag(:input, :value => "false")
+    checkbox_field(:name => "foo", :value => 0).should match_tag(:input, :value => "0")
+    checkbox_field(:name => "foo", :value => "0").should match_tag(:input, :value => "0")
+    checkbox_field(:name => "foo", :value => 1).should match_tag(:input, :value => "1")
+    checkbox_field(:name => "foo", :value => "1").should match_tag(:input, :value => "1")
+    checkbox_field(:name => "foo", :value => true).should match_tag(:input, :value => "true")
+  end
 end
 
 describe "checkbox_control (data bound)" do
@@ -422,16 +432,6 @@ describe "checkbox_control (data bound)" do
     end
   end
 
-  it "should evaulate nil, false, 0 and '0' to false. All else to true" do
-    checkbox_field(:name => "foo", :value => nil).should match_tag(:input, :value => "0")
-    checkbox_field(:name => "foo", :value => false).should match_tag(:input, :value => "0")
-    checkbox_field(:name => "foo", :value => 0).should match_tag(:input, :value => "0")
-    checkbox_field(:name => "foo", :value => "0").should match_tag(:input, :value => "0")
-    checkbox_field(:name => "foo", :value => 1).should match_tag(:input, :value => "1")
-    checkbox_field(:name => "foo", :value => "1").should match_tag(:input, :value => "1")
-    checkbox_field(:name => "foo", :value => true).should match_tag(:input, :value => "1")
-  end
-
   it "should render controls with errors if their attribute contains an error" do
     form_for @obj do
       checkbox_control(:bazbad).should match_tag(:input, :type =>"checkbox", :name => "fake_model[bazbad]",
@@ -448,43 +448,43 @@ describe "checkbox_control (data bound)" do
     _buffer.should match( /<input.*><label.*>LABEL<\/label>/ )
     res = _buffer.scan(/<[^>]*>/)
     res[0].should_not match_tag(:input, :label => "LABEL")
-    end
+  end
 
-    it "should not errorify the field for a new object" do
-      f = form_for @obj do
-        checkbox_control(:foo, :bar =>"7").should_not match_tag(:input, :type => "checkbox", :class => "error checkbox")
-      end
+  it "should not errorify the field for a new object" do
+    f = form_for @obj do
+      checkbox_control(:foo, :bar =>"7").should_not match_tag(:input, :type => "checkbox", :class => "error checkbox")
     end
+  end
 
-    it "should errorify a field for a model with errors" do
-      model = mock("model")
-      model.stub!(:new_record?).and_return(true)
-      model.stub!(:class).and_return("MyClass")
-      model.stub!(:foo).and_return("FOO")
-      errors = mock("errors")
-      errors.should_receive(:on).with(:foo).and_return(true)
+  it "should errorify a field for a model with errors" do
+    model = mock("model")
+    model.stub!(:new_record?).and_return(true)
+    model.stub!(:class).and_return("MyClass")
+    model.stub!(:foo).and_return("FOO")
+    errors = mock("errors")
+    errors.should_receive(:on).with(:foo).and_return(true)
 
-      model.stub!(:errors).and_return(errors)
+    model.stub!(:errors).and_return(errors)
 
-      f = form_for model do
-        checkbox_control(:foo, :bar =>"7").should match_tag(:input, :type => "checkbox", :class => "error checkbox")
-      end
+    f = form_for model do
+      checkbox_control(:foo, :bar =>"7").should match_tag(:input, :type => "checkbox", :class => "error checkbox")
     end
-    
-    it "should be boolean" do
-      form_for @obj do
-        html = checkbox_control(:baz)
-        html.should have_tag(:input, :type => "checkbox", :value => "1")
-        html.should have_tag(:input, :type => "hidden",   :value => "0")
-      end
+  end
+  
+  it "should be boolean" do
+    form_for @obj do
+      html = checkbox_control(:baz)
+      html.should have_tag(:input, :type => "checkbox", :value => "1")
+      html.should have_tag(:input, :type => "hidden",   :value => "0")
     end
-    
-    it "should be checked if the value of the model's attribute is equal to the value of :on" do
-      form_for @obj do
-        checkbox_control(:foo, :on => "foowee", :off => "NO").should match_tag(:input, :type =>"checkbox", :value => "foowee", :checked => "checked")
-        checkbox_control(:foo, :on => "YES",    :off => "NO").should_not include('checked="')
-      end
+  end
+  
+  it "should be checked if the value of the model's attribute is equal to the value of :on" do
+    form_for @obj do
+      checkbox_control(:foo, :on => "foowee", :off => "NO").should match_tag(:input, :type =>"checkbox", :value => "foowee", :checked => "checked")
+      checkbox_control(:foo, :on => "YES",    :off => "NO").should_not include('checked="')
     end
+  end
 end
 
 describe "hidden_field (basic)" do

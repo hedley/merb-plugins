@@ -50,6 +50,8 @@ module Merb
 
     def update_control_fields(method, attrs, type)
       case type
+      when "checkbox"
+        update_checkbox_control_field(method, attrs)
       when "select"
         update_select_control_fields(method, attrs)
       end
@@ -70,14 +72,55 @@ module Merb
       attrs[:selected] ||= @obj.send(attrs[:value_method])
     end
 
-    def update_checkbox_field(attrs)
-      on, off = attrs.delete(:on) || "1", attrs.delete(:off) || "0"
-      checked = considered_true?(attrs.delete(:value))
-      attrs[:value] = checked ? on : off
-      attrs[:checked] = "checked" if checked
+    def update_checkbox_control_field(method, attrs)
+      raise ArgumentError, ":value can't be used with a checkbox_control" if attrs.has_key?(:value)
+
+      attrs[:boolean] ||= true
+      val = @obj.send(method)
+
+      if (attrs.has_key?(:on) && val.to_s == attrs[:on].to_s) || considered_true?(val)
+        attrs[:value] = val
+        attrs[:on] ||= val
+      end
     end
 
-    %w(text radio password hidden checkbox file).each do |kind|
+    def update_checkbox_field(attrs)
+      boolean = attrs[:boolean] || (attrs[:on] && attrs[:off]) ? true : false
+
+      case
+      # when attrs.key?(:on) ^ attrs.key?(:off)
+      #   raise ArgumentError, ":on and :off must be specified together"
+      when (attrs[:boolean] == false) && (attrs.key?(:on) || attrs.key?(:off))
+        raise ArgumentError, ":boolean => false cannot be used with :on and :off"
+      # when boolean && attrs.key?(:value)
+      #   raise ArgumentError, ":value can't be used with a boolean checkbox"
+      end
+
+      if attrs[:boolean] = boolean
+        attrs[:on] ||= "1"; attrs[:off] ||= "0"
+      end
+
+      attrs[:checked] ? attrs[:checked] = "checked" : attrs.delete(:checked)
+    end
+
+    def checkbox_control(method, attrs = {})
+      name = control_name(method)
+      update_control_fields(method, attrs, "checkbox")
+      checkbox_field({:name => name}.merge(attrs))
+    end
+
+    def checkbox_field(attrs = {})
+      update_fields(attrs, "checkbox")
+      if attrs.delete(:boolean)
+        on, off = attrs.delete(:on), attrs.delete(:off)
+        self_closing_tag(:input, {:type => "checkbox", :value => on}.merge(attrs)) <<
+          hidden_field(:name => attrs[:name], :value => off)
+      else
+        self_closing_tag(:input, {:type => "checkbox"}.merge(attrs))
+      end
+    end
+
+    %w(text radio password hidden file).each do |kind|
       self.class_eval <<-RUBY, __FILE__, __LINE__ + 1
         def #{kind}_control(method, attrs = {})
           name = control_name(method)
@@ -257,7 +300,7 @@ module Merb
   end
 
   class CompleteFormWithErrors < CompleteForm
-    
+
     def update_control_fields(method, attrs, type)
       if @obj.errors.on(method.to_sym)
         add_class(attrs, "error")
