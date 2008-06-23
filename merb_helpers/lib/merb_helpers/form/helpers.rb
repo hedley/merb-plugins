@@ -27,8 +27,9 @@ module Merb
 
       def with_form_context(name, builder)
         form_contexts.push(_new_form_context(name, builder))
-        yield
+        ret = yield
         form_contexts.pop
+        ret
       end
 
       def form_tag(*args, &blk)

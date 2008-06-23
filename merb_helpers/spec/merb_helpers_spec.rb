@@ -41,35 +41,35 @@ describe "form_tag" do
   it_should_behave_like "FakeController"
 
   it "should use the post method by default" do
-    form_tag do
+    form = form_tag do
       _buffer << "CONTENT"
     end
-    _buffer.should match_tag(:form, :method => "post")
-    _buffer.should include("CONTENT")
+    form.should match_tag(:form, :method => "post")
+    form.should include("CONTENT")
   end
 
   it "should use the get method if set" do
-    form_tag :method => :get do
+    form = form_tag :method => :get do
       _buffer << "CONTENT"
     end
-    _buffer.should match_tag(:form, :method => "get")
-    _buffer.should include("CONTENT")
+    form.should match_tag(:form, :method => "get")
+    form.should include("CONTENT")
   end
   
   it "should fake out the put method if set" do
-    form_tag :method => :put do
+    form = form_tag :method => :put do
       _buffer << "CONTENT"
     end
-    _buffer.should match_tag(:form, :method => "post")
-    _buffer.should match_tag(:input, :type => "hidden", :name => "_method", :value => "put")
+    form.should match_tag(:form, :method => "post")
+    form.should match_tag(:input, :type => "hidden", :name => "_method", :value => "put")
   end
   
   it "should fake out the delete method if set" do
-    form_tag :method => :delete do
+    form = form_tag :method => :delete do
       _buffer << "CONTENT"
     end
-    _buffer.should match_tag(:form, :method => "post")
-    _buffer.should match_tag(:input, :type => "hidden", :name => "_method", :value => "delete")
+    form.should match_tag(:form, :method => "post")
+    form.should match_tag(:input, :type => "hidden", :name => "_method", :value => "delete")
   end
   
   # TODO: Why is this required?
@@ -84,19 +84,19 @@ describe "form_tag" do
   # end
   
   it "should take create a form" do
-    form_tag(:action => "foo", :method => :post) do
+    form = form_tag(:action => "foo", :method => :post) do
       _buffer << "Hello"
     end
-    _buffer.should match_tag(:form, :action => "foo", :method => "post")
-    _buffer.should include("Hello")
+    form.should match_tag(:form, :action => "foo", :method => "post")
+    form.should include("Hello")
   end
   
   it "should set a form to be mutlipart" do
-    form_tag( :action => "foo", :method => :post, :multipart => true ) do
+    form = form_tag( :action => "foo", :method => :post, :multipart => true ) do
       _buffer << "CONTENT"
     end
-    _buffer.should match_tag( :form, :action => "foo", :method => "post", :enctype => "multipart/form-data")
-    _buffer.should include("CONTENT")
+    form.should match_tag( :form, :action => "foo", :method => "post", :enctype => "multipart/form-data")
+    form.should include("CONTENT")
   end
 end
 
@@ -104,26 +104,26 @@ describe "form_for" do
   it_should_behave_like "FakeController"
 
   it "should wrap the contents in a form tag" do
-    form_for(:obj) do
+    form = form_for(:obj) do
       _buffer << "Hello"
     end
-    _buffer.should match_tag(:form, :method => "post")
-    _buffer.should match_tag(:input, :type => "hidden", :value => "put", :name => "_method")
+    form.should match_tag(:form, :method => "post")
+    form.should match_tag(:input, :type => "hidden", :value => "put", :name => "_method")
   end
 
   it "should set the method to post be default" do
     @obj2 = FakeModel2.new
-    form_for(:obj2) do
+    form = form_for(:obj2) do
     end
-    _buffer.should match_tag(:form, :method => "post")
-    _buffer.should_not match_tag(:input, :type => "hidden", :name => "_method")
+    form.should match_tag(:form, :method => "post")
+    form.should_not match_tag(:input, :type => "hidden", :name => "_method")
   end
 
   it "should support PUT if the object passed in is not a new_record? via a hidden field" do
-    form_for(:obj) do
+    form = form_for(:obj) do
     end
-    _buffer.should match_tag(:form, :method => "post")
-    _buffer.should match_tag(:input, :type => "hidden", :value => "put", :name => "_method")
+    form.should match_tag(:form, :method => "post")
+    form.should match_tag(:input, :type => "hidden", :value => "put", :name => "_method")
   end
 
 end
@@ -200,11 +200,11 @@ describe "text_control (data bound)" do
   end
 
   it "should provide an additional label tag if the :label option is passed in" do
-    form_for @obj do
+    form = form_for @obj do
       _buffer << text_control(:foo, :label => "LABEL")
     end
-    _buffer.should match(/<label.*>LABEL<\/label><input/)
-    res = _buffer.scan(/<[^>]*>/)
+    form.should match(/<label.*>LABEL<\/label><input/)
+    res = form.scan(/<[^>]*>/)
     res[2].should_not match_tag(:input, :label => "LABEL")
   end
 
@@ -246,11 +246,11 @@ describe "radio_control (data bound)" do
   end
 
   it "should provide an additional label tag if the :label option is passed in" do
-    form_for @obj do
+    form = form_for @obj do
       _buffer << radio_control(:foo, :label => "LABEL")
     end
-    _buffer.should match(/<input.*><label.*>LABEL<\/label>/)
-    res = _buffer.scan(/<[^>]*>/)
+    form.should match(/<input.*><label.*>LABEL<\/label>/)
+    res = form.scan(/<[^>]*>/)
     res[2].should_not match_tag(:input, :label => "LABEL")
   end
 
@@ -305,11 +305,11 @@ describe "password_control (data bound)" do
   end
 
   it "should provide an additional label tag if the :label option is passed in" do
-    form_for @obj do
+    form = form_for @obj do
       _buffer << password_control(:foo, :label => "LABEL")
     end
-    _buffer.should match(/<label.*>LABEL<\/label><input/)
-    res = _buffer.scan(/<[^>]*>/)
+    form.should match(/<label.*>LABEL<\/label><input/)
+    res = form.scan(/<[^>]*>/)
     res[2].should_not match_tag(:input, :label => "LABEL")
   end
 
@@ -441,11 +441,11 @@ describe "checkbox_control (data bound)" do
   end
 
   it "should provide an additional label tag if the :label option is passed in" do
-    form_for @obj do
+    form = form_for @obj do
       _buffer << checkbox_control(:foo, :label => "LABEL")
     end
-    _buffer.should match( /<input.*><label.*>LABEL<\/label>/ )
-    res = _buffer.scan(/<[^>]*>/)
+    form.should match( /<input.*><label.*>LABEL<\/label>/ )
+    res = form.scan(/<[^>]*>/)
     res[0].should_not match_tag(:input, :label => "LABEL")
   end
 
@@ -802,12 +802,12 @@ describe "fieldset generation (basic)" do
   it_should_behave_like "FakeController"
 
   it "should provide legend option" do
-    fieldset :legend => 'TEST' do
+    res = fieldset :legend => 'TEST' do
       _buffer << "CONTENT"
     end
-    _buffer.should include("CONTENT")
-    _buffer.should match_tag(:fieldset, {})
-    _buffer.should match_tag(:legend, :content => 'TEST')
+    res.should include("CONTENT")
+    res.should match_tag(:fieldset, {})
+    res.should match_tag(:legend, :content => 'TEST')
   end
 end
 
@@ -841,11 +841,11 @@ describe "file_control (data bound)" do
   end
 
   it "should wrap the file_control in a label if the :label option is passed in" do
-    form_for @obj do
+    form = form_for @obj do
       _buffer << text_control(:foo, :label => "LABEL")
     end
-    _buffer.should match(/<label.*>LABEL<\/label><input/)
-    res = _buffer.scan(/<[^>]*>/)
+    form.should match(/<label.*>LABEL<\/label><input/)
+    res = form.scan(/<[^>]*>/)
     res[2].should_not match_tag(:input, :label => "LABEL")
   end
 end

@@ -1,6 +1,6 @@
-require File.dirname(__FILE__) / "tag_helpers"
-require File.dirname(__FILE__) / "form" / "helpers"
-require File.dirname(__FILE__) / "form" / "form"
+load File.dirname(__FILE__) / "tag_helpers.rb"
+load File.dirname(__FILE__) / "form" / "helpers.rb"
+load File.dirname(__FILE__) / "form" / "form.rb"
 
 Merb::Plugins.config[:helpers] ||= {}
 Merb::Plugins.config[:helpers][:form_class] ||= Merb::Form

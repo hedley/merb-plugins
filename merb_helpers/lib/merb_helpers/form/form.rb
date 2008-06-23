@@ -13,16 +13,16 @@ module Merb
 
     def fieldset(attrs, &blk)
       legend = (l_attr = attrs.delete(:legend)) ? tag(:legend, l_attr) : ""
-      contents = tag(:fieldset, legend + @origin.capture(&blk), attrs)
-      @origin.concat(contents, blk.binding)
+      tag(:fieldset, legend + @origin.capture(&blk), attrs)
+      # @origin.concat(contents, blk.binding)
     end
 
     def form_tag(attrs = {}, &blk)
       captured = @origin.capture(&blk)
       fake_method_tag = process_form_attrs(attrs)
 
-      contents = tag(:form, fake_method_tag + captured, attrs)
-      @origin.concat(contents, blk.binding)
+      tag(:form, fake_method_tag + captured, attrs)
+      # @origin.concat(contents, blk.binding)
     end
 
     def process_form_attrs(attrs)
