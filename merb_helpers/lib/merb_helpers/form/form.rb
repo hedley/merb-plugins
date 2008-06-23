@@ -76,31 +76,32 @@ module Merb
       raise ArgumentError, ":value can't be used with a checkbox_control" if attrs.has_key?(:value)
 
       attrs[:boolean] ||= true
+      
       val = @obj.send(method)
-
-      if (attrs.has_key?(:on) && val.to_s == attrs[:on].to_s) || considered_true?(val)
-        attrs[:value] = val
-        attrs[:on] ||= val
-      end
+      attrs[:checked] = attrs.key?(:on) ? val == attrs[:on] : considered_true?(val)
     end
 
     def update_checkbox_field(attrs)
       boolean = attrs[:boolean] || (attrs[:on] && attrs[:off]) ? true : false
 
       case
-      # when attrs.key?(:on) ^ attrs.key?(:off)
-      #   raise ArgumentError, ":on and :off must be specified together"
+      when attrs.key?(:on) ^ attrs.key?(:off)
+        raise ArgumentError, ":on and :off must be specified together"
       when (attrs[:boolean] == false) && (attrs.key?(:on) || attrs.key?(:off))
         raise ArgumentError, ":boolean => false cannot be used with :on and :off"
-      # when boolean && attrs.key?(:value)
-      #   raise ArgumentError, ":value can't be used with a boolean checkbox"
+      when boolean && attrs.key?(:value)
+        raise ArgumentError, ":value can't be used with a boolean checkbox"
       end
 
       if attrs[:boolean] = boolean
         attrs[:on] ||= "1"; attrs[:off] ||= "0"
       end
 
-      attrs[:checked] ? attrs[:checked] = "checked" : attrs.delete(:checked)
+      if attrs[:checked] || (attrs[:on] && attrs[:on] == attrs[:value])
+        attrs[:checked] = "checked"
+      else
+        attrs.delete(:checked)
+      end
     end
 
     def checkbox_control(method, attrs = {})

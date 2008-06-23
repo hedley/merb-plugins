@@ -427,7 +427,6 @@ describe "checkbox_control (data bound)" do
 
   it "should allow a user to set the :off value" do
     form_for @obj do
-      checkbox_control(:baz, :off => "off", :on => "on").should match_tag(:input, :type =>"checkbox", :name => "fake_model[baz]", :class => "checkbox", :value => "on", :checked => "checked")
       checkbox_control(:bat, :off => "off", :on => "on").should match_tag(:input, :type =>"checkbox", :name => "fake_model[bat]", :class => "checkbox", :value => "off")
     end
   end
@@ -482,7 +481,7 @@ describe "checkbox_control (data bound)" do
   it "should be checked if the value of the model's attribute is equal to the value of :on" do
     form_for @obj do
       checkbox_control(:foo, :on => "foowee", :off => "NO").should match_tag(:input, :type =>"checkbox", :value => "foowee", :checked => "checked")
-      checkbox_control(:foo, :on => "YES",    :off => "NO").should_not include('checked="')
+      checkbox_control(:foo, :on => "YES",    :off => "NO", :true_if => "zoo").should_not include('checked="')
     end
   end
 end
