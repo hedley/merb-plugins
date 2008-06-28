@@ -2,10 +2,9 @@ require 'rubygems'
 require 'rake/gempackagetask'
 require 'rake/rdoctask'
 require 'spec/rake/spectask'
-require 'merb-core/tasks/merb_rake_helper'
 
 NAME = "merb_helpers"
-GEM_VERSION = "0.9.4"
+GEM_VERSION = "0.9.5"
 AUTHOR = "Yehuda Katz"
 EMAIL = "wycats@gmail.com"
 HOMEPAGE = "http://merbivore.com/"
@@ -34,7 +33,7 @@ end
 
 desc "Run :package and install resulting .gem"
 task :install => [:package] do
-  sh %{#{sudo} gem install #{install_home} pkg/#{NAME}-#{GEM_VERSION} --no-rdoc --no-ri --no-update-sources}
+  sh %{sudo gem install pkg/#{NAME}-#{GEM_VERSION} --no-rdoc --no-ri --no-update-sources}
 end
 
 Rake::RDocTask.new do |rdoc|

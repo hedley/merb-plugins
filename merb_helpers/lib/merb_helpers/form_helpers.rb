@@ -9,10 +9,9 @@ end
 
 Merb::BootLoader.after_app_loads do
 
-  Merb::Plugins.config[:helpers][:form_class] ||= Merb::Form
-
   class Merb::Controller
-    self._form_class = Merb::Plugins.config[:helpers][:form_class]
+    self._form_class = 
+      Object.full_const_get(Merb::Plugins.config[:helpers][:form_class]) rescue Merb::CompleteFormWithErrors    
   end
 
 end
