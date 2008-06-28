@@ -53,7 +53,7 @@ module Merb
       when "checkbox"
         update_checkbox_control_field(method, attrs)
       when "select"
-        update_select_control_fields(method, attrs)
+        update_select_control_field(method, attrs)
       end
     end
 
@@ -64,9 +64,11 @@ module Merb
       when "file"
         @multipart = true
       end
+
+      attrs[:disabled] ? attrs[:disabled] = "disabled" : attrs.delete(:disabled)
     end
 
-    def update_select_control_fields(method, attrs)
+    def update_select_control_field(method, attrs)
       attrs[:value_method] ||= method
       attrs[:text_method] ||= attrs[:value_method] || :to_s
       attrs[:selected] ||= @obj.send(attrs[:value_method])
