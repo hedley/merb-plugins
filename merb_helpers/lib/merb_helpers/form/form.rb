@@ -32,7 +32,7 @@ module Merb
       attrs[:method] = :post unless attrs[:method] == :get
       # Use a fake PUT if the object is not new, otherwise use the method
       # passed in.
-      method = @obj && !@obj.new_record? ? :put : method || :post
+      method ||= (@obj && !@obj.new_record? ? :put : :post)
 
       attrs[:enctype] = "multipart/form-data" if attrs.delete(:multipart) || @multipart
 
