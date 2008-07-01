@@ -79,6 +79,13 @@ module Merb
       def submit(contents, attrs = {})
         _singleton_form_context.submit(contents, attrs)
       end
+      
+      def error_messages(opts = {})
+        current_form_context.error_messages(opts[:error_class] || "error", 
+          opts[:build_li] || "<li>%s</li>", 
+          opts[:header] || "<h2>Form submission failed because of %s problem%s</h2>",
+          opts.key?(:before) ? opts[:before] : true)
+      end
 
     end
   end

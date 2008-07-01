@@ -2,40 +2,77 @@ require File.dirname(__FILE__) + '/spec_helper'
 
 Merb::Plugins.config[:helpers] = {
   :form_class => Merb::CompleteFormWithErrors
-} 
+}
 
-# describe "error_messages_for" do
-#   before :each do
-#     @obj = Object.new
-#     @errors = [["foo", "bar"],["baz","bat"]]
-#     @errors.stub!(:full_messages).and_return(["foo", "baz"])
-#     @obj.stub!(:errors).and_return(@errors)
-#   end
-# 
-#   it "should build default error messages" do
-#     errs = error_messages_for(@obj)
-#     errs.should include("<h2>Form submittal failed because of 2 problems</h2>")
-#     errs.should include("<li>foo bar</li>")
-#     errs.should include("<li>baz bat</li>")
-#   end
-# 
-#   it "should build default error messages for symbol" do
-#     errs = error_messages_for(:obj)
-#     errs.should include("<h2>Form submittal failed because of 2 problems</h2>")
-#     errs.should include("<li>foo bar</li>")
-#     errs.should include("<li>baz bat</li>")
-#   end
-# 
-#   it "should accept a custom HTML class" do
-#     errs = error_messages_for(@obj, nil, "foo")
-#     errs.should include("<div class='foo'>")
-#   end
-# 
-#   it "should accept a custom header block" do
-#     errs = error_messages_for(@obj) {|errs| "<h3>Failure: #{errs.size} issues</h3>"}
-#     errs.should include("<h3>Failure: 2 issues</h3>")
-#   end
-# end
+describe "error_messages_for" do
+  it_should_behave_like "FakeController"  
+  
+  before :each do
+    @dm_obj = Object.new
+    @sq_obj = Object.new
+    @dm_errors = [["foo", "bar"],["baz","bat"]]
+    @sq_errors = Object.new
+    @sq_errors.stub!(:full_messages).and_return(["foo", "baz"])
+    @dm_obj.stub!(:errors).and_return(@dm_errors)
+    @dm_obj.stub!(:new_record?).and_return(false)
+    @sq_obj.stub!(:errors).and_return(@sq_errors)
+    @sq_obj.stub!(:new_record?).and_return(false)
+  end
+
+  it "should build default error messages for AR-like models" do
+    form_for @dm_obj do
+      errs = error_messages(:before => false)
+      errs.should include("<h2>Form submission failed because of 2 problems</h2>")
+      errs.should include("<li>foo bar</li>")
+      errs.should include("<li>baz bat</li>")
+    end
+  end
+
+  it "should build default error messages for Sequel-like models" do
+    form_for @sq_obj do
+      errs = error_messages(:before => false)
+      errs.should include("<h2>Form submission failed because of 2 problems</h2>")
+      errs.should include("<li>foo</li>")
+      errs.should include("<li>baz</li>")
+    end
+  end
+
+  # it "should build default error messages for symbol" do
+  #   errs = error_messages_for(:obj)
+  #   errs.should include("<h2>Form submittal failed because of 2 problems</h2>")
+  #   errs.should include("<li>foo bar</li>")
+  #   errs.should include("<li>baz bat</li>")
+  # end
+
+  it "should accept a custom HTML class" do
+    form_for @dm_obj do
+      errs = error_messages(:error_class => "foo", :before => false)
+      errs.should include("<div class='foo'>")
+    end
+  end
+
+  it "should accept a custom header block" do
+    form_for @dm_obj do
+      errs = error_messages(:header => "<h3>Failure: %s issue%s</h3>", :before => false)
+      errs.should include("<h3>Failure: 2 issues</h3>")
+    end
+  end
+  
+  it "should put the error messages before a form by default" do
+    ret = form_for @dm_obj do
+      _buffer << error_messages.to_s
+    end
+    ret.should =~ /\A\s*<div class='error'>/
+    ret.should_not =~ /\s*<form.*<div class='error'>/
+  end
+  
+  it "should put the error messages inside a form if :before is false" do
+    ret = form_for @dm_obj do
+      _buffer << error_messages(:before => false)
+    end
+    ret.should =~ /\A\s*<form.*<div class='error'>/    
+  end
+end
 
 describe "form" do
   it_should_behave_like "FakeController"

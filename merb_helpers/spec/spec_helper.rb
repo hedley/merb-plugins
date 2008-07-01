@@ -4,10 +4,6 @@ require 'rubygems'
 require 'merb-core'
 require 'merb_helpers'
 Merb::Helpers.load
-include Merb::Helpers::DateAndTime
-include Merb::ControllerMixin
-include Merb::Helpers::Tag
-include Merb::Helpers::Form
 
 def unload_merb_helpers
   Merb.class_eval do
@@ -354,6 +350,10 @@ end
 describe "FakeController", :shared => true do
   class_inheritable_accessor :_form_class
   self._form_class = Merb::Plugins.config[:helpers][:form_class]
+  include Merb::Helpers::DateAndTime
+  include Merb::ControllerMixin
+  include Merb::Helpers::Tag
+  include Merb::Helpers::Form
   
   before :each do
     @obj = FakeModel.new
