@@ -32,13 +32,13 @@ module Merb
         ret
       end
 
-      def form_tag(*args, &blk)
-        _singleton_form_context.form_tag(*args, &blk)
+      def form(*args, &blk)
+        _singleton_form_context.form(*args, &blk)
       end
 
       def form_for(name, attrs = {}, &blk)
         with_form_context(name, attrs.delete(:builder)) do
-          current_form_context.form_tag(attrs, &blk)
+          current_form_context.form(attrs, &blk)
         end
       end
 
@@ -66,8 +66,8 @@ module Merb
             current_form_context.#{kind}_control(*args)
           end
 
-          def #{kind}_field(*args)
-            _singleton_form_context.#{kind}_field(*args)
+          def #{kind}(*args)
+            _singleton_form_context.#{kind}(*args)
           end
         RUBY
       end

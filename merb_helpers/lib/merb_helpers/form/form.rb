@@ -17,7 +17,7 @@ module Merb
       # @origin.concat(contents, blk.binding)
     end
 
-    def form_tag(attrs = {}, &blk)
+    def form(attrs = {}, &blk)
       captured = @origin.capture(&blk)
       fake_method_tag = process_form_attrs(attrs)
 
@@ -109,15 +109,15 @@ module Merb
     def checkbox_control(method, attrs = {})
       name = control_name(method)
       update_control_fields(method, attrs, "checkbox")
-      checkbox_field({:name => name}.merge(attrs))
+      checkbox({:name => name}.merge(attrs))
     end
 
-    def checkbox_field(attrs = {})
+    def checkbox(attrs = {})
       update_fields(attrs, "checkbox")
       if attrs.delete(:boolean)
         on, off = attrs.delete(:on), attrs.delete(:off)
         self_closing_tag(:input, {:type => "checkbox", :value => on}.merge(attrs)) <<
-          hidden_field(:name => attrs[:name], :value => off)
+          hidden(:name => attrs[:name], :value => off)
       else
         self_closing_tag(:input, {:type => "checkbox"}.merge(attrs))
       end
@@ -128,10 +128,10 @@ module Merb
         def #{kind}_control(method, attrs = {})
           name = control_name(method)
           update_control_fields(method, attrs, "#{kind}")
-          #{kind}_field({:name => name, :value => @obj.send(method)}.merge(attrs))
+          #{kind}({:name => name, :value => @obj.send(method)}.merge(attrs))
         end
 
-        def #{kind}_field(attrs = {})
+        def #{kind}(attrs = {})
           update_fields(attrs, "#{kind}")
           self_closing_tag(:input, {:type => "#{kind}"}.merge(attrs))
         end
@@ -154,10 +154,10 @@ module Merb
     def select_control(method, attrs = {})
       name = control_name(method)
       update_control_fields(method, attrs, "select")
-      select_field({:name => name}.merge(attrs))
+      select({:name => name}.merge(attrs))
     end
 
-    def select_field(attrs = {})
+    def select(attrs = {})
       update_fields(attrs, "select")
       tag(:select, options_for(attrs), attrs)
     end
@@ -171,7 +171,7 @@ module Merb
       end.join
     end
 
-    def text_area_field(contents, attrs = {})
+    def text_area(contents, attrs = {})
       update_fields(attrs, "text_area")
       tag(:textarea, contents, attrs)
     end
@@ -179,7 +179,7 @@ module Merb
     def text_area_control(method, attrs = {})
       name = "#{@name}[#{method}]"
       update_control_fields(method, attrs, "text_area")
-      text_area_field(@obj.send(method), {:name => name}.merge(attrs))
+      text_area(@obj.send(method), {:name => name}.merge(attrs))
     end
 
     private
@@ -259,7 +259,7 @@ module Merb
 
     %w(text password file).each do |kind|
       self.class_eval <<-RUBY, __FILE__, __LINE__ + 1
-        def #{kind}_field(attrs = {})
+        def #{kind}(attrs = {})
           label(attrs) + super
         end
       RUBY
@@ -273,16 +273,16 @@ module Merb
       label(attrs) + super
     end
 
-    def text_area_field(contents, attrs = {})
+    def text_area(contents, attrs = {})
       label(attrs) + super
     end
 
-    def checkbox_field(attrs = {})
+    def checkbox(attrs = {})
       label_text = label(attrs)
       super + label_text
     end
 
-    def radio_field(attrs = {})
+    def radio(attrs = {})
       label_text = label(attrs)
       super + label_text
     end
@@ -296,19 +296,34 @@ module Merb
       super
     end
 
-    def hidden_field(attrs = {})
+    def hidden(attrs = {})
       attrs.delete(:label)
       super
     end
   end
 
-  class CompleteFormWithErrors < CompleteForm
-
+  module Errorifier
     def update_control_fields(method, attrs, type)
       if @obj.errors.on(method.to_sym)
         add_class(attrs, "error")
       end
       super
+    end    
+  end
+
+  class CompleteFormWithErrors < CompleteForm
+    include Errorifier
+  end
+  
+  module Resourceful
+    def process_form_attrs(attrs)
+      attrs[:action] ||= url(@name, @obj) if @origin
+      super
     end
+  end
+  
+  class ResourcefulForm < CompleteForm
+    include Errorifier
+    include Resourceful
   end
 end
