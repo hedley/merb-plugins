@@ -109,15 +109,15 @@ module Merb
     def checkbox_control(method, attrs = {})
       name = control_name(method)
       update_control_fields(method, attrs, "checkbox")
-      checkbox({:name => name}.merge(attrs))
+      checkbox_field({:name => name}.merge(attrs))
     end
 
-    def checkbox(attrs = {})
+    def checkbox_field(attrs = {})
       update_fields(attrs, "checkbox")
       if attrs.delete(:boolean)
         on, off = attrs.delete(:on), attrs.delete(:off)
         self_closing_tag(:input, {:type => "checkbox", :value => on}.merge(attrs)) <<
-          hidden(:name => attrs[:name], :value => off)
+          hidden_field(:name => attrs[:name], :value => off)
       else
         self_closing_tag(:input, {:type => "checkbox"}.merge(attrs))
       end
@@ -128,10 +128,10 @@ module Merb
         def #{kind}_control(method, attrs = {})
           name = control_name(method)
           update_control_fields(method, attrs, "#{kind}")
-          #{kind}({:name => name, :value => @obj.send(method)}.merge(attrs))
+          #{kind}_field({:name => name, :value => @obj.send(method)}.merge(attrs))
         end
 
-        def #{kind}(attrs = {})
+        def #{kind}_field(attrs = {})
           update_fields(attrs, "#{kind}")
           self_closing_tag(:input, {:type => "#{kind}"}.merge(attrs))
         end
@@ -154,10 +154,10 @@ module Merb
     def select_control(method, attrs = {})
       name = control_name(method)
       update_control_fields(method, attrs, "select")
-      select({:name => name}.merge(attrs))
+      select_field({:name => name}.merge(attrs))
     end
 
-    def select(attrs = {})
+    def select_field(attrs = {})
       update_fields(attrs, "select")
       tag(:select, options_for(attrs), attrs)
     end
@@ -171,7 +171,7 @@ module Merb
       end.join
     end
 
-    def text_area(contents, attrs = {})
+    def text_area_field(contents, attrs = {})
       update_fields(attrs, "text_area")
       tag(:textarea, contents, attrs)
     end
@@ -179,7 +179,7 @@ module Merb
     def text_area_control(method, attrs = {})
       name = "#{@name}[#{method}]"
       update_control_fields(method, attrs, "text_area")
-      text_area(@obj.send(method), {:name => name}.merge(attrs))
+      text_area_field(@obj.send(method), {:name => name}.merge(attrs))
     end
 
     private
@@ -259,7 +259,7 @@ module Merb
 
     %w(text password file).each do |kind|
       self.class_eval <<-RUBY, __FILE__, __LINE__ + 1
-        def #{kind}(attrs = {})
+        def #{kind}_field(attrs = {})
           label(attrs) + super
         end
       RUBY
@@ -273,16 +273,16 @@ module Merb
       label(attrs) + super
     end
 
-    def text_area(contents, attrs = {})
+    def text_area_field(contents, attrs = {})
       label(attrs) + super
     end
 
-    def checkbox(attrs = {})
+    def checkbox_field(attrs = {})
       label_text = label(attrs)
       super + label_text
     end
 
-    def radio(attrs = {})
+    def radio_field(attrs = {})
       label_text = label(attrs)
       super + label_text
     end
@@ -296,7 +296,7 @@ module Merb
       super
     end
 
-    def hidden(attrs = {})
+    def hidden_field(attrs = {})
       attrs.delete(:label)
       super
     end

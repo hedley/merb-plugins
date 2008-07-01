@@ -66,8 +66,8 @@ module Merb
             current_form_context.#{kind}_control(*args)
           end
 
-          def #{kind}(*args)
-            _singleton_form_context.#{kind}(*args)
+          def #{kind}_field(*args)
+            _singleton_form_context.#{kind}_field(*args)
           end
         RUBY
       end

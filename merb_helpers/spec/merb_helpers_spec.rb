@@ -192,24 +192,24 @@ describe "fields_for" do
   end
 end
 
-describe "text (basic)" do
+describe "text_field" do
   it_should_behave_like "FakeController"
 
   it "should return a basic text field based on the values passed in" do
-    text(:name => "foo", :value => "bar").should match_tag( :input, :type => "text", :name => "foo", :value => "bar")
+    text_field(:name => "foo", :value => "bar").should match_tag( :input, :type => "text", :name => "foo", :value => "bar")
   end
 
   it "should provide an additional label tag if the :label option is passed in" do
-    result = text(:label => "LABEL" )
+    result = text_field(:label => "LABEL" )
     result.should match(/<label>LABEL<\/label><input type="text" class="text"\s*\/>/)
   end
   
   it "should be disabled if :disabled => true is passed in" do
-    text(:disabled => true).should match_tag(:input, :type => "text", :disabled => "disabled")
+    text_field(:disabled => true).should match_tag(:input, :type => "text", :disabled => "disabled")
   end
 end
 
-describe "text_control (data bound)" do
+describe "text_control" do
   it_should_behave_like "FakeController"
 
   it "should take a string object and return a useful text control" do
@@ -255,7 +255,7 @@ describe "text_control (data bound)" do
   end
 end
 
-describe "radio_control (data bound)" do
+describe "radio_control" do
   it_should_behave_like "FakeController"
 
   it "should take a string object and return a useful text control" do
@@ -301,24 +301,24 @@ describe "radio_control (data bound)" do
   end
 end
 
-describe "password (basic)" do
+describe "password_field" do
   it_should_behave_like "FakeController"
 
   it "should return a basic password field, but omit the value" do
-    password(:name => "foo", :value => "bar").should match_tag(:input, :type => "password", :name => "foo")
+    password_field(:name => "foo", :value => "bar").should match_tag(:input, :type => "password", :name => "foo")
   end
 
   it "should provide an additional label tag if the :label option is passed in" do
-    result = password(:label => "LABEL" )
+    result = password_field(:label => "LABEL" )
     result.should match(/<label.*>LABEL<\/label><input type="password" class="password"\s*\/>/)
   end
   
   it "should be disabled if :disabled => true is passed in" do
-    password(:disabled => true).should match_tag(:input, :type => "password", :disabled => "disabled")
+    password_field(:disabled => true).should match_tag(:input, :type => "password", :disabled => "disabled")
   end
 end
 
-describe "password_control (data bound)" do
+describe "password_control" do
   it_should_behave_like "FakeController"
 
   it "should take a string object and return a useful password control, but omit the value" do
@@ -365,76 +365,76 @@ describe "password_control (data bound)" do
 
 end
 
-describe "checkbox (basic)" do
+describe "checkbox_field" do
   it_should_behave_like "FakeController"
   
   it "should return a basic checkbox based on the values passed in" do
-    checkbox(:name => "foo", :checked => "checked").should match_tag(:input, :class => "checkbox", :name => "foo", :checked => "checked")
+    checkbox_field(:name => "foo", :checked => "checked").should match_tag(:input, :class => "checkbox", :name => "foo", :checked => "checked")
   end
 
   it "should provide an additional label tag if the :label option is passed in" do
-    result = checkbox(:label => "LABEL" )
+    result = checkbox_field(:label => "LABEL" )
     result.should match(/<input.*><label>LABEL<\/label>/)
     res = result.scan(/<[^>]*>/)
     res[0].should_not match_tag(:input, :label => "LABEL")
   end
   
   it 'should remove the checked="checked" attribute if :checked is false or nil' do
-    checkbox(:name => "foo", :checked => false).should_not include('checked="')
-    checkbox(:name => "foo", :checked => nil).should_not   include('checked="')
+    checkbox_field(:name => "foo", :checked => false).should_not include('checked="')
+    checkbox_field(:name => "foo", :checked => nil).should_not   include('checked="')
   end
   
   it 'should have the checked="checked" attribute if :checked => true is passed in' do
-    checkbox(:name => "foo", :checked => true).should include('checked="checked"')
+    checkbox_field(:name => "foo", :checked => true).should include('checked="checked"')
   end
 
   it "should not be boolean by default" do
-    checkbox(:name => "foo", :value => "bar").should match_tag(:input, :type => "checkbox", :name => "foo", :value => "bar")
+    checkbox_field(:name => "foo", :value => "bar").should match_tag(:input, :type => "checkbox", :name => "foo", :value => "bar")
   end
 
   it "should add a hidden input if boolean" do
-    html = checkbox(:boolean => true)
+    html = checkbox_field(:boolean => true)
     html.should have_tag(:input, :type => "checkbox", :value => "1")
     html.should have_tag(:input, :type => "hidden",   :value => "0")
   end
   
   it "should not allow a :value param if boolean" do
-    lambda { checkbox(:boolean => true, :value => "woot") }.should raise_error(ArgumentError)
-    lambda { checkbox(:on => "YES", :off => "NO", :value => "woot") }.should raise_error(ArgumentError)
+    lambda { checkbox_field(:boolean => true, :value => "woot") }.should raise_error(ArgumentError)
+    lambda { checkbox_field(:on => "YES", :off => "NO", :value => "woot") }.should raise_error(ArgumentError)
   end
 
   it "should not allow :boolean => false if :on and :off are specified" do
-    lambda { checkbox(:boolean => false, :on => "YES", :off => "NO") }.should raise_error(ArgumentError)
-    lambda { checkbox(:boolean => true,  :on => "YES", :off => "NO") }.should_not raise_error(ArgumentError)
+    lambda { checkbox_field(:boolean => false, :on => "YES", :off => "NO") }.should raise_error(ArgumentError)
+    lambda { checkbox_field(:boolean => true,  :on => "YES", :off => "NO") }.should_not raise_error(ArgumentError)
   end
 
   it "should be boolean if :on and :off are specified" do
-    html = checkbox(:name => "foo", :on => "YES", :off => "NO")
+    html = checkbox_field(:name => "foo", :on => "YES", :off => "NO")
     html.should have_tag(:input, :type => "checkbox", :value => "YES", :name => "foo")
     html.should have_tag(:input, :type => "hidden",   :value => "NO",  :name => "foo")
   end
 
   it "should have both :on and :off specified or neither" do
-    lambda { checkbox(:name => "foo", :on  => "YES") }.should raise_error(ArgumentError)
-    lambda { checkbox(:name => "foo", :off => "NO")  }.should raise_error(ArgumentError)
+    lambda { checkbox_field(:name => "foo", :on  => "YES") }.should raise_error(ArgumentError)
+    lambda { checkbox_field(:name => "foo", :off => "NO")  }.should raise_error(ArgumentError)
   end
   
   it "should convert :value to a string on a non-boolean checkbox" do
-    checkbox(:name => "foo", :value => nil).should match_tag(:input, :value => "")
-    checkbox(:name => "foo", :value => false).should match_tag(:input, :value => "false")
-    checkbox(:name => "foo", :value => 0).should match_tag(:input, :value => "0")
-    checkbox(:name => "foo", :value => "0").should match_tag(:input, :value => "0")
-    checkbox(:name => "foo", :value => 1).should match_tag(:input, :value => "1")
-    checkbox(:name => "foo", :value => "1").should match_tag(:input, :value => "1")
-    checkbox(:name => "foo", :value => true).should match_tag(:input, :value => "true")
+    checkbox_field(:name => "foo", :value => nil).should match_tag(:input, :value => "")
+    checkbox_field(:name => "foo", :value => false).should match_tag(:input, :value => "false")
+    checkbox_field(:name => "foo", :value => 0).should match_tag(:input, :value => "0")
+    checkbox_field(:name => "foo", :value => "0").should match_tag(:input, :value => "0")
+    checkbox_field(:name => "foo", :value => 1).should match_tag(:input, :value => "1")
+    checkbox_field(:name => "foo", :value => "1").should match_tag(:input, :value => "1")
+    checkbox_field(:name => "foo", :value => true).should match_tag(:input, :value => "true")
   end
   
   it "should be disabled if :disabled => true is passed in" do
-    checkbox(:disabled => true).should match_tag(:input, :type => "checkbox", :disabled => "disabled")
+    checkbox_field(:disabled => true).should match_tag(:input, :type => "checkbox", :disabled => "disabled")
   end
 end
 
-describe "checkbox_control (data bound)" do
+describe "checkbox_control" do
   it_should_behave_like "FakeController"
 
   it "should take a string and return a useful checkbox control" do
@@ -519,25 +519,25 @@ describe "checkbox_control (data bound)" do
   end
 end
 
-describe "hidden (basic)" do
+describe "hidden_field" do
   it_should_behave_like "FakeController"
   
   it "should return a basic checkbox based on the values passed in" do
-    hidden(:name => "foo", :value => "bar").should match_tag(:input, :type => "hidden", :name => "foo", :value => "bar")
+    hidden_field(:name => "foo", :value => "bar").should match_tag(:input, :type => "hidden", :name => "foo", :value => "bar")
   end
 
   it "should not render a label if the :label option is passed in" do
-    res = hidden(:label => "LABEL")
+    res = hidden_field(:label => "LABEL")
     res.should_not match(/<label>LABEL/)
     res.should_not match_tag(:input, :label=> "LABEL")
   end
   
   it "should be disabled if :disabled => true is passed in" do
-    hidden(:disabled => true).should match_tag(:input, :type => "hidden", :disabled => "disabled")
+    hidden_field(:disabled => true).should match_tag(:input, :type => "hidden", :disabled => "disabled")
   end
 end
 
-describe "hidden_control (data bound)" do
+describe "hidden_control" do
   it_should_behave_like "FakeController"
 
   it "should take a string and return a useful checkbox control" do
@@ -583,15 +583,15 @@ describe "hidden_control (data bound)" do
 
 end
 
-describe "radio button (basic)" do
+describe "radio_field" do
   it_should_behave_like "FakeController"
   
   it "should should return a basic radio button based on the values passed in" do
-    radio(:name => "foo", :value => "bar", :id => "baz").should match_tag(:input, :type => "radio", :name => "foo", :value => "bar", :id => "baz")
+    radio_field(:name => "foo", :value => "bar", :id => "baz").should match_tag(:input, :type => "radio", :name => "foo", :value => "bar", :id => "baz")
   end
 
   it "should provide an additional label tag if the :label option is passed in" do
-    result = radio(:name => "foo", :value => "bar", :label => "LABEL")
+    result = radio_field(:name => "foo", :value => "bar", :label => "LABEL")
     # result.should match(/<label.*>LABEL<\/label><input/)
     # res = result.scan(/<[^>]*>/)
     # res[2].should_not match_tag(:input, :label => "LABEL")
@@ -601,11 +601,11 @@ describe "radio button (basic)" do
   end
 
   it "should be disabled if :disabled => true is passed in" do
-    radio(:disabled => true).should match_tag(:input, :type => "radio", :disabled => "disabled")
+    radio_field(:disabled => true).should match_tag(:input, :type => "radio", :disabled => "disabled")
   end
 end
 
-describe "radio button groups (data bound)" do
+describe "radio_group_control" do
   it_should_behave_like "FakeController"
 
   it "should return a group of radio buttons" do
@@ -661,15 +661,15 @@ describe "radio button groups (data bound)" do
   end
 end
 
-describe "text area (basic)" do
+describe "text_area_field" do
   it_should_behave_like "FakeController"
   
   it "should should return a basic text area based on the values passed in" do
-    text_area("foo", :name => "foo").should match_tag(:textarea, :name => "foo")
+    text_area_field("foo", :name => "foo").should match_tag(:textarea, :name => "foo")
   end
 
   it "should handle a nil content" do
-    text_area(nil, :name => "foo").should == "<textarea name=\"foo\"></textarea>"
+    text_area_field(nil, :name => "foo").should == "<textarea name=\"foo\"></textarea>"
   end
 
 
@@ -681,18 +681,18 @@ describe "text area (basic)" do
   # end
 
   it "should render a label when the label is passed in" do
-    result = text_area( "CONTENT", :name => "foo", :value => "bar", :label => "LABEL")
+    result = text_area_field( "CONTENT", :name => "foo", :value => "bar", :label => "LABEL")
     result.should match(/<label.*>LABEL<\/label><textarea/)
     res = result.scan(/<[^>]*>/)
     res[1].should_not match_tag(:textarea, :label => "LABEL")
   end
   
   it "should be disabled if :disabled => true is passed in" do
-    text_area("Woop Woop Woop!", :disabled => true).should match_tag(:textarea, :disabled => "disabled")
+    text_area_field("Woop Woop Woop!", :disabled => true).should match_tag(:textarea, :disabled => "disabled")
   end
 end
 
-describe "text area (data bound)" do
+describe "text_area_control" do
   it_should_behave_like "FakeController"
 
   it "should provide :id attribute" do
@@ -702,7 +702,7 @@ describe "text area (data bound)" do
   end
 end
 
-describe "select (data bound)" do
+describe "select_control" do
 
   it_should_behave_like "FakeController"
 
@@ -764,7 +764,7 @@ describe "option tag generation (data bound)" do
       content.should match_tag( :option, :content => "foowee2", :value => "barbar" )
     end
     
-    # content = options_from_collection_for_select( [FakeModel.new, FakeModel2.new], :text_method => 'foo', :value_method => 'bar' )
+    # content = options_from_collection_for_select_field( [FakeModel.new, FakeModel2.new], :text_method => 'foo', :value_method => 'bar' )
     # content.should match_tag( :option, :content => "foowee", :value => "7" )
     # content.should match_tag( :option, :content => "foowee2", :value => "barbar" )
   end
@@ -786,7 +786,7 @@ describe "option tag generation (data bound)" do
     end
 
     # collection = [@model1, @model2, @model3].inject({}) {|s,e| (s[e.make] ||= []) << e; s }
-    # content = options_from_collection_for_select(collection, :text_method => 'model', :value_method => 'vin', :selected => '1')
+    # content = options_from_collection_for_select_field(collection, :text_method => 'model', :value_method => 'vin', :selected => '1')
 
   end
 
@@ -814,23 +814,23 @@ describe "option tags generation (basic)" do
   end
 
   it "should provide an option tag for each item in the collection" do
-    result = select(:collection => @collection)
+    result = select_field(:collection => @collection)
     doc = Hpricot( result )
     (doc/"option").size.should == 3
   end
 
   it "should provide a blank option" do
-    content = select(:collection => @collection, :include_blank => true )
+    content = select_field(:collection => @collection, :include_blank => true )
     content.should match_tag( :option, :value => '' )
   end
 
   it "should provide a prompt option" do
-    content = select( :collection => [], :prompt => 'Choose' )
+    content = select_field( :collection => [], :prompt => 'Choose' )
     content.should match_tag( :option, :value => '', :content => 'Choose' )
   end
 
   it "should provide selected options by value" do
-    content = select( :collection => [['rabbit','Rabbit'],['chicken','Chicken']], 
+    content = select_field( :collection => [['rabbit','Rabbit'],['chicken','Chicken']], 
       :selected => 'rabbit' )
     content.should match_tag( :option, :value => 'rabbit', :selected => 'selected', :content => 'Rabbit' )
     content.should_not match_tag( :option, :value => 'chicken', :selected => nil, :content => 'Chicken' )
@@ -838,7 +838,7 @@ describe "option tags generation (basic)" do
 
   it "should render a hash of options as optgroup" do
     collection = { "Fruit" => [['orange','Orange'],['banana','Banana']], "Vegetables" => [['corn','Corn']]}
-    content = select(:collection => collection, :selected => 'banana')
+    content = select_field(:collection => collection, :selected => 'banana')
     content.should match_tag( :optgroup, :label => 'Fruit' )
     content.should match_tag( :optgroup, :label => 'Vegetables' )
     content.should match_tag( :option, :value => 'banana', :selected => 'selected', :content => 'Banana' )
@@ -846,7 +846,7 @@ describe "option tags generation (basic)" do
 
 end
 
-describe "fieldset generation (basic)" do
+describe "fieldset" do
   it_should_behave_like "FakeController"
 
   it "should provide legend option" do
@@ -859,24 +859,24 @@ describe "fieldset generation (basic)" do
   end
 end
 
-describe "file (basic)" do
+describe "file_field" do
   it_should_behave_like "FakeController"
 
   it "should return a basic file field based on the values passed in" do
-    file(:name => "foo", :value => "bar").should match_tag( :input, :type => "file", :name => "foo", :value => "bar")
+    file_field(:name => "foo", :value => "bar").should match_tag( :input, :type => "file", :name => "foo", :value => "bar")
   end
 
   it "should wrap the field in a label if the :label option is passed to the file" do
-    result = file(:label => "LABEL" )
+    result = file_field(:label => "LABEL" )
     result.should match(/<label>LABEL<\/label><input type="file" class="file"\s*\/>/)
   end
   
   it "should be disabled if :disabled => true is passed in" do
-    file(:disabled => true).should match_tag(:input, :type => "file", :disabled => "disabled")
+    file_field(:disabled => true).should match_tag(:input, :type => "file", :disabled => "disabled")
   end
 end
 
-describe "file_control (data bound)" do
+describe "file_control" do
   it_should_behave_like "FakeController"
 
   it "should take a string object and return a useful file control" do
@@ -901,7 +901,7 @@ describe "file_control (data bound)" do
   end
 end
 
-describe "submit (basic)" do
+describe "submit" do
   it_should_behave_like "FakeController"  
   
   it "should return a basic submit input based on the values passed in" do
@@ -921,7 +921,7 @@ describe "submit (basic)" do
   end
 end
 
-describe "button (basic)" do
+describe "button" do
   it_should_behave_like "FakeController"  
   
   it "should return a button based on the values passed in" do
