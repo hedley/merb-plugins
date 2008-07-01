@@ -20,21 +20,17 @@ describe "error_messages_for" do
   end
 
   it "should build default error messages for AR-like models" do
-    form_for @dm_obj do
-      errs = error_messages(:before => false)
-      errs.should include("<h2>Form submission failed because of 2 problems</h2>")
-      errs.should include("<li>foo bar</li>")
-      errs.should include("<li>baz bat</li>")
-    end
+    errs = error_messages_for(@dm_obj)
+    errs.should include("<h2>Form submission failed because of 2 problems</h2>")
+    errs.should include("<li>foo bar</li>")
+    errs.should include("<li>baz bat</li>")
   end
 
   it "should build default error messages for Sequel-like models" do
-    form_for @sq_obj do
-      errs = error_messages(:before => false)
-      errs.should include("<h2>Form submission failed because of 2 problems</h2>")
-      errs.should include("<li>foo</li>")
-      errs.should include("<li>baz</li>")
-    end
+    errs = error_messages_for(@sq_obj)
+    errs.should include("<h2>Form submission failed because of 2 problems</h2>")
+    errs.should include("<li>foo</li>")
+    errs.should include("<li>baz</li>")
   end
 
   # it "should build default error messages for symbol" do
@@ -45,30 +41,18 @@ describe "error_messages_for" do
   # end
 
   it "should accept a custom HTML class" do
-    form_for @dm_obj do
-      errs = error_messages(:error_class => "foo", :before => false)
-      errs.should include("<div class='foo'>")
-    end
+    errs = error_messages_for(@dm_obj, :error_class => "foo")
+    errs.should include("<div class='foo'>")
   end
 
   it "should accept a custom header block" do
-    form_for @dm_obj do
-      errs = error_messages(:header => "<h3>Failure: %s issue%s</h3>", :before => false)
-      errs.should include("<h3>Failure: 2 issues</h3>")
-    end
-  end
-  
-  it "should put the error messages before a form by default" do
-    ret = form_for @dm_obj do
-      _buffer << error_messages.to_s
-    end
-    ret.should =~ /\A\s*<div class='error'>/
-    ret.should_not =~ /\s*<form.*<div class='error'>/
+    errs = error_messages_for(@dm_obj, :header => "<h3>Failure: %s issue%s</h3>")
+    errs.should include("<h3>Failure: 2 issues</h3>")
   end
   
   it "should put the error messages inside a form if :before is false" do
     ret = form_for @dm_obj do
-      _buffer << error_messages(:before => false)
+      _buffer << error_messages
     end
     ret.should =~ /\A\s*<form.*<div class='error'>/    
   end

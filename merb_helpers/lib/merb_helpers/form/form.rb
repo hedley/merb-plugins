@@ -21,8 +21,7 @@ module Merb
       captured = @origin.capture(&blk)
       fake_method_tag = process_form_attrs(attrs)
       
-      ret = @pre_form || ""
-      ret << tag(:form, fake_method_tag + captured, attrs)
+      tag(:form, fake_method_tag + captured, attrs)
       # @origin.concat(contents, blk.binding)
     end
 
@@ -311,11 +310,12 @@ module Merb
       super
     end
     
-    def error_messages(error_class, build_li, header, before)
-      return "" unless @obj.respond_to?(:errors)
+    def error_messages_for(obj, error_class, build_li, header, before)
+      obj ||= @obj
+      return "" unless obj.respond_to?(:errors)
       
-      sequel = !@obj.errors.respond_to?(:each)
-      errors = sequel ? @obj.errors.full_messages : @obj.errors
+      sequel = !obj.errors.respond_to?(:each)
+      errors = sequel ? obj.errors.full_messages : obj.errors
 
       return "" if errors.empty?
 
@@ -323,9 +323,6 @@ module Merb
       markup = %Q{<div class='#{error_class}'>#{header_message}<ul>}
       errors.each {|err| markup << (build_li % (sequel ? err : err.join(" ")))}
       markup << %Q{</ul></div>}
-      
-      @pre_form = before ? markup : nil
-      markup unless before
     end
   end
 
