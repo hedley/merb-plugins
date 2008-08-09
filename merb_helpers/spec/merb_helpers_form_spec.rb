@@ -4,6 +4,7 @@ Merb::Plugins.config[:helpers] = {
   :form_class => Merb::Helpers::Form::Builder::FormWithErrors
 }
 
+# @todo - error_messages_for needs more complete specs
 describe "error_messages_for" do
   it_should_behave_like "FakeController"  
   

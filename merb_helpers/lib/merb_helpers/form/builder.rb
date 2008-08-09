@@ -16,15 +16,28 @@ module Merb::Helpers::Form::Builder
 
     # Provides the ability to create quick fieldsets as blocks for your forms.
     #
-    # ==== Example
-    #     <%= fieldset :legend => 'Customer Options' do -%>
-    #     ...your form elements
-    #     <% end =%>
+    # Note: Block helpers use the <%= =%> syntax
     #
-    #     => <fieldset><legend>Customer Options</legend>...your form elements</fieldset>
+    # ==== Parameters
+    # attrs<Hash>:: HTML attributes and options
     #
     # ==== Options
-    # +legend+:: The name of this fieldset which will be provided in a HTML legend tag.
+    # +legend+:: Adds a legend tag within the fieldset
+    #
+    # ==== Returns
+    # String:: HTML
+    #
+    # ==== Example
+    #   <%= fieldset :legend => "Customer Options" do %>
+    #     ...your form elements
+    #   <% end =%>
+    #
+    #   Generates the HTML:
+    #
+    #   <fieldset>
+    #     <legend>Customer Options</legend>
+    #     ...your form elements
+    #   </fieldset>
     def fieldset(attrs, &blk)
       legend = (l_attr = attrs.delete(:legend)) ? tag(:legend, l_attr) : ""
       tag(:fieldset, legend + @origin.capture(&blk), attrs)
@@ -32,18 +45,29 @@ module Merb::Helpers::Form::Builder
     end
 
     # Generates a form tag, which accepts a block that is not directly based on resource attributes
-    # 
-    #     <%= form :action => url(:controller => "foo", :action => "bar", :id => 1) do %>
-    #       <%= text_field :name => 'first_name', :label => 'First Name' %>
-    #       <%= submit_button 'Create' %>
-    #     <% end =%>
     #
-    # The HTML generated for this would be:
+    # Notes:
+    #  * Block helpers use the <%= =%> syntax
+    #  * a multipart enctype is automatically set if the form contains a file upload field
     #
-    #     <form action="/foo/bar/1" method="post">
-    #       <label for="first_name">First Name</label><input id="first_name" name="first_name" size="30" type="text" />
-    #       <input name="commit" type="submit" value="Create" />
-    #     </form>
+    # ==== Parameters
+    # attrs<Hash>:: HTML attributes
+    #
+    # ==== Returns
+    # String:: HTML
+    #
+    # ==== Example
+    #   <%= form :action => url(:controller => "foo", :action => "bar", :id => 1) do %>
+    #     <%= text_field :name => "first_name", :label => "First Name" %>
+    #     <%= submit_button "Create" %>
+    #   <% end =%>
+    #
+    #   Generates the HTML:
+    #
+    #   <form action="/foo/bar/1" method="post">
+    #     <label for="first_name">First Name</label><input id="first_name" name="first_name" size="30" type="text" />
+    #     <input name="commit" type="submit" value="Create" />
+    #   </form>
     def form(attrs = {}, &blk)
       captured = @origin.capture(&blk)
       fake_method_tag = process_form_attrs(attrs)
@@ -165,19 +189,39 @@ module Merb::Helpers::Form::Builder
       RUBY
     end
 
-    # Provides a generic HTML button.
+    # Generates a HTML button.
+    #
+    # Notes:
+    #  * Buttons do not always work as planned in IE
+    #    http://www.peterbe.com/plog/button-tag-in-IE
+    #  * Not all mobile browsers support buttons
+    #    http://nickcowie.com/2007/time-to-stop-using-the-button-element/
+    #
+    # ==== Parameters
+    # contents<String>:: HTML contained within the button tag
+    # attrs<Hash>:: HTML attributes
+    #
+    # ==== Returns
+    # String:: HTML
     #
     # ==== Example
-    #     <%= button "Process" %>
+    #   <%= button "Initiate Launch Sequence" %>
     def button(contents, attrs)
       update_fields(attrs, "button")
       tag(:button, contents, attrs)
     end
 
-    # Provides a generic HTML submit button.
+    # Generates a HTML submit button.
+    #
+    # ==== Parameters
+    # value<String>:: Sets the value="" attribute
+    # attrs<Hash>:: HTML attributes
+    #
+    # ==== Returns
+    # String:: HTML
     #
     # ==== Example
-    #     <%= submit "Process" %>
+    #   <%= submit "Process" %>
     def submit(value, attrs)
       attrs[:type]  ||= "submit"
       attrs[:name]  ||= "submit"
@@ -189,8 +233,18 @@ module Merb::Helpers::Form::Builder
     # Provides a HTML select based on a resource attribute.
     # This is generally used within a resource block such as +form_for+.
     #
+    # ==== Parameters
+    # method<Symbol>:: Resource attribute
+    # attrs<Hash>:: HTML attributes and options
+    #
+    # ==== Options
+    # +collection+:: An array of items to choose from
+    #
+    # ==== Returns
+    # String:: HTML
+    #
     # ==== Example
-    #     <% select_control :name, :collection => %w(one two three four) %>
+    #   <%= select_control :name, :collection => %w(one two three four) %>
     def select_control(method, attrs = {})
       name = control_name(method)
       update_control_fields(method, attrs, "select")
@@ -199,6 +253,9 @@ module Merb::Helpers::Form::Builder
 
     # Provides a generic HTML select.
     #
+    # ==== Parameters
+    # attrs<Hash>:: HTML attributes and options
+    #
     # ==== Options
     # +prompt+:: Adds an additional option tag with the provided string with no value.
     # +selected+:: The value of a selected object, which may be either a string or an array.
@@ -206,6 +263,9 @@ module Merb::Helpers::Form::Builder
     # +collection+:: The collection for the select options
     # +text_method+:: Method to determine text of an option (as a symbol). Ex: :text_method => :name  will call .name on your record object for what text to display.
     # +value_method+:: Method to determine value of an option (as a symbol).
+    #
+    # ==== Returns
+    # String:: HTML
     def select_field(attrs = {})
       update_fields(attrs, "select")
       tag(:select, options_for(attrs), attrs)
@@ -214,12 +274,19 @@ module Merb::Helpers::Form::Builder
     # Provides a radio group based on a resource attribute.
     # This is generally used within a resource block such as +form_for+.
     #
+    # ==== Parameters
+    # method<Symbol>:: Resource attribute
+    # arr<Array>:: Choices
+    #
+    # ==== Returns
+    # String:: HTML
+    #
     # ==== Examples
-    #     <%# the labels are the options %>
-    #     <%= radio_group_control :my_choice, [5,6,7] %>
-    # 
-    #     <%# custom labels %>
-    #     <%= radio_group_control :my_choice, [{:value => 5, :label => "five"}] %>
+    #   <%# the labels are the options %>
+    #   <%= radio_group_control :my_choice, [5,6,7] %>
+    #
+    #   <%# custom labels %>
+    #   <%= radio_group_control :my_choice, [{:value => 5, :label => "five"}] %>
     def radio_group_control(method, arr)
       val = @obj.send(method)
       arr.map do |attrs|
@@ -231,8 +298,15 @@ module Merb::Helpers::Form::Builder
 
     # Provides a generic HTML textarea tag.
     #
+    # ==== Parameters
+    # contents<String>:: Contents of the text area
+    # attrs<Hash>:: HTML attributes
+    #
+    # ==== Returns
+    # String:: HTML
+    #
     # ==== Example
-    #     <% text_area_field "my comments", :name => "comments", :label => "Comments" %>
+    #   <%= text_area_field "my comments", :name => "comments" %>
     def text_area_field(contents, attrs = {})
       update_fields(attrs, "text_area")
       tag(:textarea, contents, attrs)
@@ -241,8 +315,15 @@ module Merb::Helpers::Form::Builder
     # Provides a HTML textarea based on a resource attribute
     # This is generally used within a resource block such as +form_for+
     #
+    # ==== Parameters
+    # method<Symbol>:: Resource attribute
+    # attrs<Hash>:: HTML attributes
+    #
+    # ==== Returns
+    # String:: HTML
+    #
     # ==== Example
-    #     <% text_area_control :comments, :label => "Comments"
+    #   <%= text_area_control :comments %>
     def text_area_control(method, attrs = {})
       name = "#{@name}[#{method}]"
       update_control_fields(method, attrs, "text_area")
@@ -262,17 +343,23 @@ module Merb::Helpers::Form::Builder
     # specified, the matching "last" or element will get the selected option-tag. Selected may also
     # be an array of values to be selected when using a multiple select.
     #
-    # ==== Examples
-    #   <%= options_for_select( [['apple','Apple Pie'],['orange','Orange Juice']], :selected => 'orange' )
-    #   => <option value="apple">Apple Pie</option><option value="orange" selected="selected">Orange Juice</option>
-    #
-    #   <%= options_for_select( [['apple','Apple Pie'],['orange','Orange Juice']], :selected => ['orange','apple'], :prompt => 'Select One' )
-    #   => <option value="">Select One</option><option value="apple" selected="selected">Apple Pie</option><option value="orange" selected="selected">Orange Juice</option>
+    # ==== Parameters
+    # attrs<Hash>:: HTML attributes and options
     #
     # ==== Options
     # +selected+:: The value of a selected object, which may be either a string or an array.
     # +prompt+:: Adds an addtional option tag with the provided string with no value.
     # +include_blank+:: Adds an additional blank option tag with no value.
+    #
+    # ==== Returns
+    # String:: HTML
+    #
+    # ==== Examples
+    #   <%= options_for_select [["apple", "Apple Pie"], ["orange", "Orange Juice"]], :selected => "orange"
+    #   => <option value="apple">Apple Pie</option><option value="orange" selected="selected">Orange Juice</option>
+    #
+    #   <%= options_for_select [["apple", "Apple Pie"], ["orange", "Orange Juice"]], :selected => ["orange", "apple"], :prompt => "Select One"
+    #   => <option value="">Select One</option><option value="apple" selected="selected">Apple Pie</option><option value="orange" selected="selected">Orange Juice</option>
     def options_for(attrs)
       if attrs.delete(:include_blank)
         b = tag(:option, "", :value => "")
@@ -335,9 +422,15 @@ module Merb::Helpers::Form::Builder
 
     # Provides a generic HTML label.
     #
+    # ==== Parameters
+    # attrs<Hash>:: HTML attributes
+    #
+    # ==== Returns
+    # String:: HTML
+    #
     # ==== Example
-    #     <% label "Name", "", :for => "name" %> 
-    #     # => <label for="name">Name</label>
+    #   <%= label :for => "name", :label => "Full Name" %> 
+    #   => <label for="name">Full Name</label>
     def label(attrs)
       attrs ||= {}
       for_attr = attrs[:id] ? {:for => attrs[:id]} : {}
@@ -389,8 +482,14 @@ module Merb::Helpers::Form::Builder
 
     # Provides a generic HTML hidden input field.
     #
+    # ==== Parameters
+    # attrs<Hash>:: HTML attributes
+    #
+    # ==== Returns
+    # String:: HTML
+    #
     # ==== Example
-    #     <%= hidden_field :name => "secret", :value => "some secret value" %>
+    #   <%= hidden_field :name => "secret", :value => "some secret value" %>
     def hidden_field(attrs = {})
       attrs.delete(:label)
       super
@@ -406,9 +505,16 @@ module Merb::Helpers::Form::Builder
     end
 
     # Provides a HTML formatted display of resource errors in an unordered list with a h2 form submission error
-    # ==== Options
-    # +build_li+:: Block for generating a list item for an error. It receives an instance of the error.
-    # +html_class+:: Set for custom error div class default is <tt>submission_failed<tt>
+    #
+    # ==== Parameters
+    # obj<Symbol>:: Model or Resource
+    # error_class<String>:: CSS class to use for error container
+    # build_li<String>:: Custom li tag to wrap each error in
+    # header<String>:: Custom header text for the error container
+    # before<Boolean>:: Display the errors before or inside of the form
+    #
+    # ==== Returns
+    # String:: HTML
     #
     # ==== Examples
     #   <%= error_messages_for :person %>
