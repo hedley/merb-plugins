@@ -1,7 +1,7 @@
 require File.dirname(__FILE__) + '/spec_helper'
 
 Merb::Plugins.config[:helpers] = {
-  :form_class => Merb::CompleteFormWithErrors
+  :form_class => Merb::Helpers::Form::Builder::FormWithErrors
 }
 
 describe "error_messages_for" do

@@ -1,5 +1,8 @@
-module Merb
-  class Form
+load File.dirname(__FILE__) / ".." / "tag_helpers.rb"
+
+module Merb::Helpers::Form::Builder
+
+  class Base
     include Merb::Helpers::Tag
 
     def initialize(obj, name, origin)
@@ -11,16 +14,40 @@ module Merb
       @origin.concat(@origin.capture(&blk), blk.binding)
     end
 
+    # Provides the ability to create quick fieldsets as blocks for your forms.
+    #
+    # ==== Example
+    #     <%= fieldset :legend => 'Customer Options' do -%>
+    #     ...your form elements
+    #     <% end =%>
+    #
+    #     => <fieldset><legend>Customer Options</legend>...your form elements</fieldset>
+    #
+    # ==== Options
+    # +legend+:: The name of this fieldset which will be provided in a HTML legend tag.
     def fieldset(attrs, &blk)
       legend = (l_attr = attrs.delete(:legend)) ? tag(:legend, l_attr) : ""
       tag(:fieldset, legend + @origin.capture(&blk), attrs)
       # @origin.concat(contents, blk.binding)
     end
 
+    # Generates a form tag, which accepts a block that is not directly based on resource attributes
+    # 
+    #     <%= form :action => url(:controller => "foo", :action => "bar", :id => 1) do %>
+    #       <%= text_field :name => 'first_name', :label => 'First Name' %>
+    #       <%= submit_button 'Create' %>
+    #     <% end =%>
+    #
+    # The HTML generated for this would be:
+    #
+    #     <form action="/foo/bar/1" method="post">
+    #       <label for="first_name">First Name</label><input id="first_name" name="first_name" size="30" type="text" />
+    #       <input name="commit" type="submit" value="Create" />
+    #     </form>
     def form(attrs = {}, &blk)
       captured = @origin.capture(&blk)
       fake_method_tag = process_form_attrs(attrs)
-      
+
       tag(:form, fake_method_tag + captured, attrs)
       # @origin.concat(contents, blk.binding)
     end
@@ -44,7 +71,7 @@ module Merb
       self_closing_tag(:input, :type => "hidden", :name => "_method", :value => method)
     end
 
-    def add_class(attrs, new_class)
+    def add_css_class(attrs, new_class)
       attrs[:class] = (attrs[:class].to_s.split(" ") + [new_class]).join(" ")
     end
 
@@ -78,7 +105,7 @@ module Merb
       raise ArgumentError, ":value can't be used with a checkbox_control" if attrs.has_key?(:value)
 
       attrs[:boolean] ||= true
-      
+
       val = @obj.send(method)
       attrs[:checked] = attrs.key?(:on) ? val == attrs[:on] : considered_true?(val)
     end
@@ -138,11 +165,19 @@ module Merb
       RUBY
     end
 
+    # Provides a generic HTML button.
+    #
+    # ==== Example
+    #     <%= button "Process" %>
     def button(contents, attrs)
       update_fields(attrs, "button")
       tag(:button, contents, attrs)
     end
 
+    # Provides a generic HTML submit button.
+    #
+    # ==== Example
+    #     <%= submit "Process" %>
     def submit(value, attrs)
       attrs[:type]  ||= "submit"
       attrs[:name]  ||= "submit"
@@ -151,17 +186,40 @@ module Merb
       self_closing_tag(:input, {:type => "submit"}.merge(attrs))
     end
 
+    # Provides a HTML select based on a resource attribute.
+    # This is generally used within a resource block such as +form_for+.
+    #
+    # ==== Example
+    #     <% select_control :name, :collection => %w(one two three four) %>
     def select_control(method, attrs = {})
       name = control_name(method)
       update_control_fields(method, attrs, "select")
       select_field({:name => name}.merge(attrs))
     end
 
+    # Provides a generic HTML select.
+    #
+    # ==== Options
+    # +prompt+:: Adds an additional option tag with the provided string with no value.
+    # +selected+:: The value of a selected object, which may be either a string or an array.
+    # +include_blank+:: Adds an additional blank option tag with no value.
+    # +collection+:: The collection for the select options
+    # +text_method+:: Method to determine text of an option (as a symbol). Ex: :text_method => :name  will call .name on your record object for what text to display.
+    # +value_method+:: Method to determine value of an option (as a symbol).
     def select_field(attrs = {})
       update_fields(attrs, "select")
       tag(:select, options_for(attrs), attrs)
     end
 
+    # Provides a radio group based on a resource attribute.
+    # This is generally used within a resource block such as +form_for+.
+    #
+    # ==== Examples
+    #     <%# the labels are the options %>
+    #     <%= radio_group_control :my_choice, [5,6,7] %>
+    # 
+    #     <%# custom labels %>
+    #     <%= radio_group_control :my_choice, [{:value => 5, :label => "five"}] %>
     def radio_group_control(method, arr)
       val = @obj.send(method)
       arr.map do |attrs|
@@ -171,11 +229,20 @@ module Merb
       end.join
     end
 
+    # Provides a generic HTML textarea tag.
+    #
+    # ==== Example
+    #     <% text_area_field "my comments", :name => "comments", :label => "Comments" %>
     def text_area_field(contents, attrs = {})
       update_fields(attrs, "text_area")
       tag(:textarea, contents, attrs)
     end
 
+    # Provides a HTML textarea based on a resource attribute
+    # This is generally used within a resource block such as +form_for+
+    #
+    # ==== Example
+    #     <% text_area_control :comments, :label => "Comments"
     def text_area_control(method, attrs = {})
       name = "#{@name}[#{method}]"
       update_control_fields(method, attrs, "text_area")
@@ -183,10 +250,29 @@ module Merb
     end
 
     private
+
     def control_name(method)
       "#{@name}[#{method}]"
     end
 
+    # Accepts a collection (hash, array, enumerable, your type) and returns a string of option tags. 
+    # Given a collection where the elements respond to first and last (such as a two-element array), 
+    # the "lasts" serve as option values and the "firsts" as option text. Hashes are turned into
+    # this form automatically, so the keys become "firsts" and values become lasts. If selected is
+    # specified, the matching "last" or element will get the selected option-tag. Selected may also
+    # be an array of values to be selected when using a multiple select.
+    #
+    # ==== Examples
+    #   <%= options_for_select( [['apple','Apple Pie'],['orange','Orange Juice']], :selected => 'orange' )
+    #   => <option value="apple">Apple Pie</option><option value="orange" selected="selected">Orange Juice</option>
+    #
+    #   <%= options_for_select( [['apple','Apple Pie'],['orange','Orange Juice']], :selected => ['orange','apple'], :prompt => 'Select One' )
+    #   => <option value="">Select One</option><option value="apple" selected="selected">Apple Pie</option><option value="orange" selected="selected">Orange Juice</option>
+    #
+    # ==== Options
+    # +selected+:: The value of a selected object, which may be either a string or an array.
+    # +prompt+:: Adds an addtional option tag with the provided string with no value.
+    # +include_blank+:: Adds an additional blank option tag with no value.
     def options_for(attrs)
       if attrs.delete(:include_blank)
         b = tag(:option, "", :value => "")
@@ -233,7 +319,7 @@ module Merb
     end
   end
 
-  class CompleteForm < Form
+  class Form < Base
     def update_control_fields(method, attrs, type)
       attrs.merge!(:id => "#{@name}_#{method}") unless attrs[:id]
       super
@@ -242,11 +328,16 @@ module Merb
     def update_fields(attrs, type)
       case type
       when "text", "radio", "password", "hidden", "checkbox", "file"
-        add_class(attrs, type)
+        add_css_class(attrs, type)
       end
       super
     end
 
+    # Provides a generic HTML label.
+    #
+    # ==== Example
+    #     <% label "Name", "", :for => "name" %> 
+    #     # => <label for="name">Name</label>
     def label(attrs)
       attrs ||= {}
       for_attr = attrs[:id] ? {:for => attrs[:id]} : {}
@@ -296,6 +387,10 @@ module Merb
       super
     end
 
+    # Provides a generic HTML hidden input field.
+    #
+    # ==== Example
+    #     <%= hidden_field :name => "secret", :value => "some secret value" %>
     def hidden_field(attrs = {})
       attrs.delete(:label)
       super
@@ -305,15 +400,25 @@ module Merb
   module Errorifier
     def update_control_fields(method, attrs, type)
       if @obj.errors.on(method.to_sym)
-        add_class(attrs, "error")
+        add_css_class(attrs, "error")
       end
       super
     end
-    
+
+    # Provides a HTML formatted display of resource errors in an unordered list with a h2 form submission error
+    # ==== Options
+    # +build_li+:: Block for generating a list item for an error. It receives an instance of the error.
+    # +html_class+:: Set for custom error div class default is <tt>submission_failed<tt>
+    #
+    # ==== Examples
+    #   <%= error_messages_for :person %>
+    #   <%= error_messages_for :person {|errors| "You can has probs nao: #{errors.size} of em!"}
+    #   <%= error_messages_for :person, lambda{|error| "<li class='aieeee'>#{error.join(' ')}"} %>
+    #   <%= error_messages_for :person, nil, 'bad_mojo' %>
     def error_messages_for(obj, error_class, build_li, header, before)
       obj ||= @obj
       return "" unless obj.respond_to?(:errors)
-      
+
       sequel = !obj.errors.respond_to?(:each)
       errors = sequel ? obj.errors.full_messages : obj.errors
 
@@ -326,19 +431,24 @@ module Merb
     end
   end
 
-  class CompleteFormWithErrors < CompleteForm
+  class FormWithErrors < Form
     include Errorifier
   end
-  
+
   module Resourceful
     def process_form_attrs(attrs)
       attrs[:action] ||= url(@name, @obj) if @origin
       super
     end
   end
-  
-  class ResourcefulForm < CompleteForm
+
+  class ResourcefulForm < Form
+    include Resourceful
+  end
+
+  class ResourcefulFormWithErrors < FormWithErrors
     include Errorifier
     include Resourceful
   end
+
 end
